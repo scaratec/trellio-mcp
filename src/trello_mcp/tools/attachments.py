@@ -8,7 +8,7 @@ from trello_mcp.errors import handle_api_error
 async def list_attachments(card_id: str) -> str:
     try:
         attachments = await get_client().list_attachments(card_id=card_id)
-        return json.dumps([
+        return json.dumps(ensure_ascii=False, obj=[
             {"id": a.id, "name": a.name, "url": a.url}
             for a in attachments
         ])
@@ -22,7 +22,7 @@ async def create_attachment(card_id: str, url: str, name: str = "") -> str:
         att = await get_client().create_attachment(
             card_id=card_id, url=url, name=name or None,
         )
-        return json.dumps({"id": att.id, "name": att.name, "url": att.url})
+        return json.dumps(ensure_ascii=False, obj={"id": att.id, "name": att.name, "url": att.url})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -33,6 +33,6 @@ async def delete_attachment(card_id: str, attachment_id: str) -> str:
         await get_client().delete_attachment(
             card_id=card_id, attachment_id=attachment_id,
         )
-        return json.dumps({"deleted": True})
+        return json.dumps(ensure_ascii=False, obj={"deleted": True})
     except TrelloAPIError as e:
         handle_api_error(e)

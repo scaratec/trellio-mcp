@@ -24,7 +24,7 @@ async def read_board_resource(board_id: str) -> str:
             "name": lst.name,
             "cards": [{"id": c.id, "name": c.name} for c in cards],
         })
-    return json.dumps({
+    return json.dumps(ensure_ascii=False, obj={
         "board": {"id": board.id, "name": board.name},
         "lists": result_lists,
     })
@@ -36,7 +36,7 @@ async def read_card_resource(card_id: str) -> str:
     checklists = await client.list_card_checklists(card_id=card_id)
     comments = await client.list_comments(card_id=card_id)
     attachments = await client.list_attachments(card_id=card_id)
-    return json.dumps({
+    return json.dumps(ensure_ascii=False, obj={
         "card": {
             "id": card.id,
             "name": card.name,

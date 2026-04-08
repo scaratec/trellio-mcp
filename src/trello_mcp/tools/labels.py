@@ -8,7 +8,7 @@ from trello_mcp.errors import handle_api_error
 async def list_board_labels(board_id: str) -> str:
     try:
         labels = await get_client().list_board_labels(board_id=board_id)
-        return json.dumps([
+        return json.dumps(ensure_ascii=False, obj=[
             {"id": l.id, "name": l.name, "color": l.color}
             for l in labels
         ])
@@ -22,7 +22,7 @@ async def create_label(board_id: str, name: str, color: str) -> str:
         label = await get_client().create_label(
             name=name, color=color, board_id=board_id,
         )
-        return json.dumps({"id": label.id, "name": label.name, "color": label.color})
+        return json.dumps(ensure_ascii=False, obj={"id": label.id, "name": label.name, "color": label.color})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -36,7 +36,7 @@ async def update_label(label_id: str, name: str = "", color: str = "") -> str:
         if color:
             kwargs["color"] = color
         label = await get_client().update_label(label_id=label_id, **kwargs)
-        return json.dumps({"id": label.id, "name": label.name, "color": label.color})
+        return json.dumps(ensure_ascii=False, obj={"id": label.id, "name": label.name, "color": label.color})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -45,6 +45,6 @@ async def update_label(label_id: str, name: str = "", color: str = "") -> str:
 async def delete_label(label_id: str) -> str:
     try:
         await get_client().delete_label(label_id=label_id)
-        return json.dumps({"deleted": True})
+        return json.dumps(ensure_ascii=False, obj={"deleted": True})
     except TrelloAPIError as e:
         handle_api_error(e)

@@ -8,7 +8,7 @@ from trello_mcp.errors import handle_api_error
 async def list_comments(card_id: str) -> str:
     try:
         comments = await get_client().list_comments(card_id=card_id)
-        return json.dumps([
+        return json.dumps(ensure_ascii=False, obj=[
             {"id": c.id, "text": c.text}
             for c in comments
         ])
@@ -20,7 +20,7 @@ async def list_comments(card_id: str) -> str:
 async def add_comment(card_id: str, text: str) -> str:
     try:
         comment = await get_client().add_comment(card_id=card_id, text=text)
-        return json.dumps({"id": comment.id, "text": comment.text})
+        return json.dumps(ensure_ascii=False, obj={"id": comment.id, "text": comment.text})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -31,7 +31,7 @@ async def update_comment(comment_id: str, text: str) -> str:
         comment = await get_client().update_comment(
             comment_id=comment_id, text=text,
         )
-        return json.dumps({"id": comment.id, "text": comment.text})
+        return json.dumps(ensure_ascii=False, obj={"id": comment.id, "text": comment.text})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -40,6 +40,6 @@ async def update_comment(comment_id: str, text: str) -> str:
 async def delete_comment(comment_id: str) -> str:
     try:
         await get_client().delete_comment(comment_id=comment_id)
-        return json.dumps({"deleted": True})
+        return json.dumps(ensure_ascii=False, obj={"deleted": True})
     except TrelloAPIError as e:
         handle_api_error(e)

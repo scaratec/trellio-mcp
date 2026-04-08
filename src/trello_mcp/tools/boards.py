@@ -8,7 +8,7 @@ from trello_mcp.errors import handle_api_error
 async def list_boards() -> str:
     try:
         boards = await get_client().list_boards()
-        return json.dumps([
+        return json.dumps(ensure_ascii=False, obj=[
             {"id": b.id, "name": b.name, "closed": b.closed}
             for b in boards
         ])
@@ -20,7 +20,7 @@ async def list_boards() -> str:
 async def create_board(name: str, description: str = "") -> str:
     try:
         board = await get_client().create_board(name=name, description=description or None)
-        return json.dumps({"id": board.id, "name": board.name})
+        return json.dumps(ensure_ascii=False, obj={"id": board.id, "name": board.name})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -29,7 +29,7 @@ async def create_board(name: str, description: str = "") -> str:
 async def get_board(board_id: str) -> str:
     try:
         board = await get_client().get_board(board_id=board_id)
-        return json.dumps({
+        return json.dumps(ensure_ascii=False, obj={
             "id": board.id,
             "name": board.name,
             "description": board.description or "",
@@ -48,7 +48,7 @@ async def update_board(board_id: str, name: str = "", description: str = "") -> 
         if description:
             kwargs["description"] = description
         board = await get_client().update_board(board_id=board_id, **kwargs)
-        return json.dumps({"id": board.id, "name": board.name})
+        return json.dumps(ensure_ascii=False, obj={"id": board.id, "name": board.name})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -70,7 +70,7 @@ async def get_board_overview(board_id: str) -> str:
                     for c in cards
                 ],
             })
-        return json.dumps({
+        return json.dumps(ensure_ascii=False, obj={
             "board": {"id": board.id, "name": board.name},
             "lists": result_lists,
         })
@@ -82,6 +82,6 @@ async def get_board_overview(board_id: str) -> str:
 async def delete_board(board_id: str) -> str:
     try:
         await get_client().delete_board(board_id=board_id)
-        return json.dumps({"deleted": True})
+        return json.dumps(ensure_ascii=False, obj={"deleted": True})
     except TrelloAPIError as e:
         handle_api_error(e)

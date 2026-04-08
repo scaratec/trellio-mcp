@@ -8,7 +8,7 @@ from trello_mcp.errors import handle_api_error
 async def list_cards(list_id: str) -> str:
     try:
         cards = await get_client().list_cards(list_id=list_id)
-        return json.dumps([
+        return json.dumps(ensure_ascii=False, obj=[
             {"id": c.id, "name": c.name, "desc": c.description or ""}
             for c in cards
         ])
@@ -29,7 +29,7 @@ async def create_card(list_id: str, name: str, desc: str = "", pos: str = "top",
         if dueComplete:
             kwargs["dueComplete"] = dueComplete.lower() == "true"
         card = await get_client().create_card(**kwargs)
-        return json.dumps({"id": card.id, "name": card.name})
+        return json.dumps(ensure_ascii=False, obj={"id": card.id, "name": card.name})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -38,7 +38,7 @@ async def create_card(list_id: str, name: str, desc: str = "", pos: str = "top",
 async def get_card(card_id: str) -> str:
     try:
         card = await get_client().get_card(card_id=card_id)
-        return json.dumps({
+        return json.dumps(ensure_ascii=False, obj={
             "id": card.id,
             "name": card.name,
             "desc": card.description or "",
@@ -68,7 +68,7 @@ async def update_card(card_id: str, name: str = "", desc: str = "", idList: str 
         if idLabels:
             kwargs["idLabels"] = idLabels
         card = await get_client().update_card(card_id=card_id, **kwargs)
-        return json.dumps({"id": card.id, "name": card.name})
+        return json.dumps(ensure_ascii=False, obj={"id": card.id, "name": card.name})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -77,7 +77,7 @@ async def update_card(card_id: str, name: str = "", desc: str = "", idList: str 
 async def add_label_to_card(card_id: str, label_id: str) -> str:
     try:
         await get_client().add_label_to_card(card_id=card_id, label_id=label_id)
-        return json.dumps({"success": True})
+        return json.dumps(ensure_ascii=False, obj={"success": True})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -86,7 +86,7 @@ async def add_label_to_card(card_id: str, label_id: str) -> str:
 async def remove_label_from_card(card_id: str, label_id: str) -> str:
     try:
         await get_client().remove_label_from_card(card_id=card_id, label_id=label_id)
-        return json.dumps({"success": True})
+        return json.dumps(ensure_ascii=False, obj={"success": True})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -95,6 +95,6 @@ async def remove_label_from_card(card_id: str, label_id: str) -> str:
 async def delete_card(card_id: str) -> str:
     try:
         await get_client().delete_card(card_id=card_id)
-        return json.dumps({"deleted": True})
+        return json.dumps(ensure_ascii=False, obj={"deleted": True})
     except TrelloAPIError as e:
         handle_api_error(e)

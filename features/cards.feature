@@ -64,6 +64,21 @@ Feature: Card Tools
         | list_id  | ls-100     |
         | name     | Quick Task |
 
+  # --- Unicode handling ---
+  # Bug fix: json.dumps escapes non-ASCII by default (§2.3)
+
+  Scenario Outline: Create a card with Unicode characters
+    Given the Trello API will return a created card with id "<card_id>"
+    When I call the "create_card" tool with:
+      | list_id | name   |
+      | ls-100  | <name> |
+    Then the raw result should contain "<raw_fragment>"
+
+    Examples:
+      | name                  | raw_fragment | card_id |
+      | Zahlung (200€)        | 200€         | cd-u01  |
+      | Rücksprache mit Jörg  | Rücksprache  | cd-u02  |
+
   # --- create_card with due date ---
   # Anti-hardcoding: 2 ISO 8601 date variants (§2.3)
   # Persistence validation (§4.3)

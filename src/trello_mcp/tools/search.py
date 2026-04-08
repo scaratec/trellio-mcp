@@ -8,7 +8,7 @@ from trello_mcp.errors import handle_api_error
 async def search(query: str, limit: int = 10) -> str:
     try:
         result = await get_client().search(query=query, limit=limit)
-        return json.dumps({
+        return json.dumps(ensure_ascii=False, obj={
             "boards": [
                 {"id": b.id, "name": b.name}
                 for b in result.boards

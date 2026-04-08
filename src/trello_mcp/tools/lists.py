@@ -8,7 +8,7 @@ from trello_mcp.errors import handle_api_error
 async def list_lists(board_id: str) -> str:
     try:
         lists = await get_client().list_lists(board_id=board_id)
-        return json.dumps([
+        return json.dumps(ensure_ascii=False, obj=[
             {"id": l.id, "name": l.name}
             for l in lists
         ])
@@ -20,6 +20,6 @@ async def list_lists(board_id: str) -> str:
 async def create_list(board_id: str, name: str) -> str:
     try:
         lst = await get_client().create_list(board_id=board_id, name=name)
-        return json.dumps({"id": lst.id, "name": lst.name})
+        return json.dumps(ensure_ascii=False, obj={"id": lst.id, "name": lst.name})
     except TrelloAPIError as e:
         handle_api_error(e)

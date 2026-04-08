@@ -8,7 +8,7 @@ from trello_mcp.errors import handle_api_error
 async def list_card_checklists(card_id: str) -> str:
     try:
         checklists = await get_client().list_card_checklists(card_id=card_id)
-        return json.dumps([
+        return json.dumps(ensure_ascii=False, obj=[
             {"id": cl.id, "name": cl.name}
             for cl in checklists
         ])
@@ -20,7 +20,7 @@ async def list_card_checklists(card_id: str) -> str:
 async def create_checklist(card_id: str, name: str) -> str:
     try:
         cl = await get_client().create_checklist(card_id=card_id, name=name)
-        return json.dumps({"id": cl.id, "name": cl.name})
+        return json.dumps(ensure_ascii=False, obj={"id": cl.id, "name": cl.name})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -29,7 +29,7 @@ async def create_checklist(card_id: str, name: str) -> str:
 async def delete_checklist(checklist_id: str) -> str:
     try:
         await get_client().delete_checklist(checklist_id=checklist_id)
-        return json.dumps({"deleted": True})
+        return json.dumps(ensure_ascii=False, obj={"deleted": True})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -40,7 +40,7 @@ async def create_check_item(checklist_id: str, name: str) -> str:
         item = await get_client().create_check_item(
             checklist_id=checklist_id, name=name,
         )
-        return json.dumps({"id": item.id, "name": item.name, "state": item.state})
+        return json.dumps(ensure_ascii=False, obj={"id": item.id, "name": item.name, "state": item.state})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -51,7 +51,7 @@ async def update_check_item(card_id: str, check_item_id: str, state: str) -> str
         item = await get_client().update_check_item(
             card_id=card_id, check_item_id=check_item_id, state=state,
         )
-        return json.dumps({"id": item.id, "name": item.name, "state": item.state})
+        return json.dumps(ensure_ascii=False, obj={"id": item.id, "name": item.name, "state": item.state})
     except TrelloAPIError as e:
         handle_api_error(e)
 
@@ -62,6 +62,6 @@ async def delete_check_item(checklist_id: str, check_item_id: str) -> str:
         await get_client().delete_check_item(
             checklist_id=checklist_id, check_item_id=check_item_id,
         )
-        return json.dumps({"deleted": True})
+        return json.dumps(ensure_ascii=False, obj={"deleted": True})
     except TrelloAPIError as e:
         handle_api_error(e)

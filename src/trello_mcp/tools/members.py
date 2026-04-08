@@ -8,7 +8,7 @@ from trello_mcp.errors import handle_api_error
 async def get_me() -> str:
     try:
         member = await get_client().get_me()
-        return json.dumps({
+        return json.dumps(ensure_ascii=False, obj={
             "id": member.id,
             "username": member.username,
             "fullName": member.full_name,
@@ -21,7 +21,7 @@ async def get_me() -> str:
 async def list_board_members(board_id: str) -> str:
     try:
         members = await get_client().list_board_members(board_id=board_id)
-        return json.dumps([
+        return json.dumps(ensure_ascii=False, obj=[
             {"id": m.id, "username": m.username, "fullName": m.full_name}
             for m in members
         ])
@@ -33,7 +33,7 @@ async def list_board_members(board_id: str) -> str:
 async def get_member(member_id: str) -> str:
     try:
         member = await get_client().get_member(member_id=member_id)
-        return json.dumps({
+        return json.dumps(ensure_ascii=False, obj={
             "id": member.id,
             "username": member.username,
             "fullName": member.full_name,

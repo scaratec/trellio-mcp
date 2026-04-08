@@ -47,6 +47,13 @@ def step_result_has_field(context, field, value):
     assert actual == value, f"Expected {field}={value}, got {actual}"
 
 
+@then('the raw result should contain "{fragment}"')
+def step_raw_result_contains(context, fragment):
+    assert fragment in context.result, (
+        f"Expected '{fragment}' in result, got: {context.result}"
+    )
+
+
 @then('the result should confirm success')
 def step_result_confirms_success(context):
     data = json.loads(context.result)

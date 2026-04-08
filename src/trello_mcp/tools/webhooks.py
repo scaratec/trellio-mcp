@@ -8,7 +8,7 @@ from trello_mcp.errors import handle_api_error
 async def list_webhooks() -> str:
     try:
         webhooks = await get_client().list_webhooks()
-        return json.dumps([
+        return json.dumps(ensure_ascii=False, obj=[
             {
                 "id": w.id,
                 "description": w.description or "",
@@ -29,7 +29,7 @@ async def create_webhook(callback_url: str, id_model: str, description: str = ""
             id_model=id_model,
             description=description or None,
         )
-        return json.dumps({
+        return json.dumps(ensure_ascii=False, obj={
             "id": wh.id,
             "callbackURL": wh.callback_url,
         })
@@ -41,7 +41,7 @@ async def create_webhook(callback_url: str, id_model: str, description: str = ""
 async def get_webhook(webhook_id: str) -> str:
     try:
         wh = await get_client().get_webhook(webhook_id=webhook_id)
-        return json.dumps({
+        return json.dumps(ensure_ascii=False, obj={
             "id": wh.id,
             "description": wh.description or "",
             "callbackURL": wh.callback_url,
@@ -60,7 +60,7 @@ async def update_webhook(webhook_id: str, description: str = "", active: str = "
         if active:
             kwargs["active"] = active.lower() == "true"
         wh = await get_client().update_webhook(webhook_id=webhook_id, **kwargs)
-        return json.dumps({
+        return json.dumps(ensure_ascii=False, obj={
             "id": wh.id,
             "description": wh.description or "",
         })
@@ -72,6 +72,6 @@ async def update_webhook(webhook_id: str, description: str = "", active: str = "
 async def delete_webhook(webhook_id: str) -> str:
     try:
         await get_client().delete_webhook(webhook_id=webhook_id)
-        return json.dumps({"deleted": True})
+        return json.dumps(ensure_ascii=False, obj={"deleted": True})
     except TrelloAPIError as e:
         handle_api_error(e)
