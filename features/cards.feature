@@ -216,6 +216,26 @@ Feature: Card Tools
       | cd-401  | Design Review | UX feedback |
       | cd-402  | Deploy v2     | Production  |
 
+  # --- get_card returns idLabels ---
+
+  Scenario: Get a card includes assigned labels
+    Given the Trello API returns card "cd-701" with name "Labeled" desc "test" and labels "lb-001,lb-002"
+    When I call the "get_card" tool with card_id "cd-701"
+    Then the result should have field "id" with value "cd-701"
+      And the result field "idLabels" should be the list "lb-001,lb-002"
+
+  # --- list_cards returns idLabels ---
+
+  Scenario: List cards includes assigned labels
+    Given the Trello API returns cards with labels for list "ls-100":
+      | id     | name      | idLabels      |
+      | cd-801 | Task One  | lb-001,lb-002 |
+      | cd-802 | Task Two  | lb-003        |
+    When I call the "list_cards" tool with list_id "ls-100"
+    Then the result should be a JSON list with 2 entries
+      And entry 0 field "idLabels" should be the list "lb-001,lb-002"
+      And entry 1 field "idLabels" should be the list "lb-003"
+
   # --- update_card ---
   # Persistence validation (§4.3)
 

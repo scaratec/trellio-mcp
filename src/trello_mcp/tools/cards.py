@@ -9,7 +9,7 @@ async def list_cards(list_id: str) -> str:
     try:
         cards = await get_client().list_cards(list_id=list_id)
         return json.dumps(ensure_ascii=False, obj=[
-            {"id": c.id, "name": c.name, "desc": c.description or ""}
+            {"id": c.id, "name": c.name, "desc": c.description or "", "idLabels": c.id_labels}
             for c in cards
         ])
     except TrelloAPIError as e:
@@ -44,6 +44,7 @@ async def get_card(card_id: str) -> str:
             "desc": card.description or "",
             "idList": card.id_list,
             "idBoard": card.id_board or "",
+            "idLabels": card.id_labels,
         })
     except TrelloAPIError as e:
         handle_api_error(e)

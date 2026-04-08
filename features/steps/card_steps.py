@@ -32,6 +32,27 @@ def step_api_returns_card(context, card_id, name, desc):
     context.mock_client.get_card.side_effect = mock_get
 
 
+@given('the Trello API returns card "{card_id}" with name "{name}" desc "{desc}" and labels "{labels}"')
+def step_api_returns_card_with_labels(context, card_id, name, desc, labels):
+    label_ids = [l.strip() for l in labels.split(",")]
+
+    async def mock_get(card_id):
+        return TrelloCard(id=card_id, name=name, idList="ls-000", desc=desc, idLabels=label_ids)
+
+    context.mock_client.get_card.side_effect = mock_get
+
+
+@given('the Trello API returns cards with labels for list "{list_id}":')
+def step_api_returns_cards_with_labels(context, list_id):
+    cards = []
+    for row in context.table:
+        label_ids = [l.strip() for l in row["idLabels"].split(",")]
+        cards.append(TrelloCard(
+            id=row["id"], name=row["name"], idList=list_id, idLabels=label_ids,
+        ))
+    context.mock_client.list_cards.return_value = cards
+
+
 @given('the Trello API will return an updated card with id "{card_id}" and name "{new_name}"')
 def step_api_returns_updated_card(context, card_id, new_name):
     async def mock_update(card_id, **kwargs):

@@ -54,6 +54,22 @@ def step_raw_result_contains(context, fragment):
     )
 
 
+@then('the result field "{field}" should be the list "{csv}"')
+def step_result_field_is_list(context, field, csv):
+    data = json.loads(context.result)
+    expected = [v.strip() for v in csv.split(",")]
+    actual = data[field]
+    assert actual == expected, f"Expected {field}={expected}, got {actual}"
+
+
+@then('entry {index:d} field "{field}" should be the list "{csv}"')
+def step_entry_field_is_list(context, index, field, csv):
+    data = context.result_data
+    expected = [v.strip() for v in csv.split(",")]
+    actual = data[index][field]
+    assert actual == expected, f"Expected {field}={expected}, got {actual}"
+
+
 @then('the result should confirm success')
 def step_result_confirms_success(context):
     data = json.loads(context.result)
