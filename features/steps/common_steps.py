@@ -67,7 +67,11 @@ def step_client_called_with(context, method):
     for row in context.table:
         arg_name = row["argument"]
         expected = row["value"]
-        actual = str(kwargs.get(arg_name, ""))
+        raw = kwargs.get(arg_name, "")
+        if isinstance(raw, bool):
+            actual = str(raw).lower()
+        else:
+            actual = str(raw)
         assert actual == expected, (
             f"{method}({arg_name}): expected {expected}, got {actual}"
         )

@@ -16,14 +16,18 @@ async def list_cards(list_id: str) -> str:
         handle_api_error(e)
 
 
-@server.tool(description="Create a new card in a Trello list. Optionally set position (top/bottom) and labels (comma-separated label IDs). Returns the created card with id and name.")
-async def create_card(list_id: str, name: str, desc: str = "", pos: str = "top", idLabels: str = "") -> str:
+@server.tool(description="Create a new card in a Trello list. Optionally set position (top/bottom), labels (comma-separated label IDs), due date (ISO 8601), and dueComplete (true/false). Returns the created card with id and name.")
+async def create_card(list_id: str, name: str, desc: str = "", pos: str = "top", idLabels: str = "", due: str = "", dueComplete: str = "") -> str:
     try:
         kwargs = {"list_id": list_id, "name": name, "pos": pos}
         if desc:
             kwargs["desc"] = desc
         if idLabels:
             kwargs["idLabels"] = idLabels
+        if due:
+            kwargs["due"] = due
+        if dueComplete:
+            kwargs["dueComplete"] = dueComplete.lower() == "true"
         card = await get_client().create_card(**kwargs)
         return json.dumps({"id": card.id, "name": card.name})
     except TrelloAPIError as e:
@@ -45,8 +49,8 @@ async def get_card(card_id: str) -> str:
         handle_api_error(e)
 
 
-@server.tool(description="Update a Trello card. Provide card_id and fields to update: name, desc, idList, pos (top/bottom/number), idLabels (comma-separated label IDs). Returns the updated card.")
-async def update_card(card_id: str, name: str = "", desc: str = "", idList: str = "", pos: str = "", idLabels: str = "") -> str:
+@server.tool(description="Update a Trello card. Provide card_id and fields to update: name, desc, idList, pos (top/bottom/number), idLabels (comma-separated label IDs), due (ISO 8601), dueComplete (true/false). Returns the updated card.")
+async def update_card(card_id: str, name: str = "", desc: str = "", idList: str = "", pos: str = "", idLabels: str = "", due: str = "", dueComplete: str = "") -> str:
     try:
         kwargs = {}
         if name:
@@ -57,6 +61,10 @@ async def update_card(card_id: str, name: str = "", desc: str = "", idList: str 
             kwargs["idList"] = idList
         if pos:
             kwargs["pos"] = pos
+        if due:
+            kwargs["due"] = due
+        if dueComplete:
+            kwargs["dueComplete"] = dueComplete.lower() == "true"
         if idLabels:
             kwargs["idLabels"] = idLabels
         card = await get_client().update_card(card_id=card_id, **kwargs)

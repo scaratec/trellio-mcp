@@ -64,6 +64,45 @@ Feature: Card Tools
         | list_id  | ls-100     |
         | name     | Quick Task |
 
+  # --- create_card with due date ---
+  # Anti-hardcoding: 2 ISO 8601 date variants (§2.3)
+  # Persistence validation (§4.3)
+
+  Scenario Outline: Create a card with a due date
+    Given the Trello API will return a created card with id "<card_id>"
+    When I call the "create_card" tool with:
+      | list_id   | name   | due   |
+      | <list_id> | <name> | <due> |
+    Then the result should have field "id" with value "<card_id>"
+      And the Trello client "create_card" should have been called with:
+        | argument | value     |
+        | list_id  | <list_id> |
+        | name     | <name>    |
+        | due      | <due>     |
+
+    Examples:
+      | list_id | name          | due                  | card_id |
+      | ls-100  | Sprint Review | 2026-04-15T10:00:00Z | cd-901  |
+      | ls-200  | Release Day   | 2026-05-01T18:00:00Z | cd-902  |
+
+  # --- update_card with due date and dueComplete ---
+
+  Scenario Outline: Update a card due date and mark complete
+    Given the Trello API will return an updated card with id "<card_id>" and name "Task"
+    When I call the "update_card" tool with:
+      | card_id   | due   | dueComplete   |
+      | <card_id> | <due> | <dueComplete> |
+    Then the Trello client "update_card" should have been called with:
+      | argument    | value         |
+      | card_id     | <card_id>     |
+      | due         | <due>         |
+      | dueComplete | <dueComplete> |
+
+    Examples:
+      | card_id | due                  | dueComplete |
+      | cd-501  | 2026-04-20T09:00:00Z | false       |
+      | cd-502  | 2026-06-01T12:00:00Z | true        |
+
   # --- create_card with position ---
   # Trellio supports pos parameter (§2.3 anti-hardcoding)
 

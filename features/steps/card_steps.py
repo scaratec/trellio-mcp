@@ -18,7 +18,7 @@ def step_api_returns_cards(context, list_id):
 
 @given('the Trello API will return a created card with id "{card_id}"')
 def step_api_returns_created_card(context, card_id):
-    async def mock_create(list_id, name, desc=None, pos="top", idLabels=None):
+    async def mock_create(list_id, name, desc=None, pos="top", idLabels=None, due=None, dueComplete=None):
         return TrelloCard(id=card_id, name=name, idList=list_id, desc=desc or "")
 
     context.mock_client.create_card.side_effect = mock_create
@@ -76,6 +76,10 @@ def step_call_create_card(context):
         kwargs["pos"] = row["pos"]
     if "idLabels" in context.table.headings:
         kwargs["idLabels"] = row["idLabels"]
+    if "due" in context.table.headings:
+        kwargs["due"] = row["due"]
+    if "dueComplete" in context.table.headings:
+        kwargs["dueComplete"] = row["dueComplete"]
     context.result = run_async(create_card(**kwargs))
 
 
