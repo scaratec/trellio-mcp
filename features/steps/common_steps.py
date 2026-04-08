@@ -47,6 +47,12 @@ def step_result_has_field(context, field, value):
     assert actual == value, f"Expected {field}={value}, got {actual}"
 
 
+@then('the result should confirm success')
+def step_result_confirms_success(context):
+    data = json.loads(context.result)
+    assert data.get("success") is True, f"Expected success=true, got {data}"
+
+
 @then('the result should confirm deletion')
 def step_result_confirms_deletion(context):
     data = json.loads(context.result)

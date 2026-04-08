@@ -64,6 +64,90 @@ Feature: Card Tools
         | list_id  | ls-100     |
         | name     | Quick Task |
 
+  # --- create_card with position ---
+  # Trellio supports pos parameter (§2.3 anti-hardcoding)
+
+  Scenario Outline: Create a card at a specific position
+    Given the Trello API will return a created card with id "<card_id>"
+    When I call the "create_card" tool with:
+      | list_id   | name   | pos   |
+      | <list_id> | <name> | <pos> |
+    Then the result should have field "id" with value "<card_id>"
+      And the Trello client "create_card" should have been called with:
+        | argument | value     |
+        | list_id  | <list_id> |
+        | name     | <name>    |
+        | pos      | <pos>     |
+
+    Examples:
+      | list_id | name       | pos    | card_id |
+      | ls-100  | Top Task   | top    | cd-701  |
+      | ls-200  | Bottom Job | bottom | cd-702  |
+
+  # --- create_card with labels ---
+
+  Scenario: Create a card with labels
+    Given the Trello API will return a created card with id "cd-801"
+    When I call the "create_card" tool with:
+      | list_id | name         | idLabels        |
+      | ls-100  | Labeled Task | lb-001,lb-002   |
+    Then the result should have field "id" with value "cd-801"
+      And the Trello client "create_card" should have been called with:
+        | argument | value           |
+        | list_id  | ls-100          |
+        | name     | Labeled Task    |
+        | idLabels | lb-001,lb-002   |
+
+  # --- update_card with position and labels ---
+
+  Scenario: Update a card position and labels
+    Given the Trello API will return an updated card with id "cd-901" and name "Moved Card"
+    When I call the "update_card" tool with:
+      | card_id | pos    | idLabels      |
+      | cd-901  | top    | lb-003,lb-004 |
+    Then the Trello client "update_card" should have been called with:
+      | argument | value         |
+      | card_id  | cd-901        |
+      | pos      | top           |
+      | idLabels | lb-003,lb-004 |
+
+  # --- add_label_to_card ---
+  # Persistence validation (§4.3)
+
+  Scenario Outline: Add a label to a card
+    Given the Trello API will accept adding a label to a card
+    When I call the "add_label_to_card" tool with:
+      | card_id   | label_id   |
+      | <card_id> | <label_id> |
+    Then the result should confirm success
+      And the Trello client "add_label_to_card" should have been called with:
+        | argument | value      |
+        | card_id  | <card_id>  |
+        | label_id | <label_id> |
+
+    Examples:
+      | card_id | label_id |
+      | cd-100  | lb-001   |
+      | cd-200  | lb-002   |
+
+  # --- remove_label_from_card ---
+
+  Scenario Outline: Remove a label from a card
+    Given the Trello API will accept removing a label from a card
+    When I call the "remove_label_from_card" tool with:
+      | card_id   | label_id   |
+      | <card_id> | <label_id> |
+    Then the result should confirm success
+      And the Trello client "remove_label_from_card" should have been called with:
+        | argument | value      |
+        | card_id  | <card_id>  |
+        | label_id | <label_id> |
+
+    Examples:
+      | card_id | label_id |
+      | cd-100  | lb-001   |
+      | cd-200  | lb-002   |
+
   # --- get_card ---
 
   Scenario Outline: Get a card by ID

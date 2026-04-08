@@ -18,7 +18,7 @@ def step_api_returns_cards(context, list_id):
 
 @given('the Trello API will return a created card with id "{card_id}"')
 def step_api_returns_created_card(context, card_id):
-    async def mock_create(list_id, name, desc=None, pos="top"):
+    async def mock_create(list_id, name, desc=None, pos="top", idLabels=None):
         return TrelloCard(id=card_id, name=name, idList=list_id, desc=desc or "")
 
     context.mock_client.create_card.side_effect = mock_create
@@ -55,6 +55,16 @@ def step_call_list_cards(context, list_id):
     context.result = run_async(list_cards(list_id=list_id))
 
 
+@given('the Trello API will accept adding a label to a card')
+def step_api_accepts_add_label(context):
+    context.mock_client.add_label_to_card.return_value = None
+
+
+@given('the Trello API will accept removing a label from a card')
+def step_api_accepts_remove_label(context):
+    context.mock_client.remove_label_from_card.return_value = None
+
+
 @when('I call the "create_card" tool with:')
 def step_call_create_card(context):
     from trello_mcp.tools.cards import create_card
@@ -62,6 +72,10 @@ def step_call_create_card(context):
     kwargs = {"list_id": row["list_id"], "name": row["name"]}
     if "desc" in context.table.headings:
         kwargs["desc"] = row["desc"]
+    if "pos" in context.table.headings:
+        kwargs["pos"] = row["pos"]
+    if "idLabels" in context.table.headings:
+        kwargs["idLabels"] = row["idLabels"]
     context.result = run_async(create_card(**kwargs))
 
 
@@ -77,6 +91,24 @@ def step_call_update_card(context):
     row = context.table[0]
     kwargs = {h: row[h] for h in context.table.headings}
     context.result = run_async(update_card(**kwargs))
+
+
+@when('I call the "add_label_to_card" tool with:')
+def step_call_add_label_to_card(context):
+    from trello_mcp.tools.cards import add_label_to_card
+    row = context.table[0]
+    context.result = run_async(add_label_to_card(
+        card_id=row["card_id"], label_id=row["label_id"],
+    ))
+
+
+@when('I call the "remove_label_from_card" tool with:')
+def step_call_remove_label_from_card(context):
+    from trello_mcp.tools.cards import remove_label_from_card
+    row = context.table[0]
+    context.result = run_async(remove_label_from_card(
+        card_id=row["card_id"], label_id=row["label_id"],
+    ))
 
 
 @when('I call the "delete_card" tool with card_id "{card_id}"')
