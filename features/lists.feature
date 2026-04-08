@@ -51,3 +51,51 @@ Feature: List Tools
       | board_id | name        | list_id |
       | bd-100   | To Do       | ls-101  |
       | bd-200   | In Progress | ls-202  |
+
+  # --- update_list ---
+  # Anti-hardcoding + Persistence validation (§2.3, §4.3)
+
+  Scenario Outline: Update a list name
+    Given the Trello API will return an updated list with id "<list_id>" and name "<new_name>"
+    When I call the "update_list" tool with:
+      | list_id   | name       |
+      | <list_id> | <new_name> |
+    Then the result should have field "id" with value "<list_id>"
+      And the result should have field "name" with value "<new_name>"
+      And the Trello client "update_list" should have been called with:
+        | argument | value      |
+        | list_id  | <list_id>  |
+        | name     | <new_name> |
+
+    Examples:
+      | list_id | new_name     |
+      | ls-301  | Renamed List |
+      | ls-302  | Done Done    |
+
+  Scenario: Update a list position
+    Given the Trello API will return an updated list with id "ls-401" and name "Moved"
+    When I call the "update_list" tool with:
+      | list_id | pos |
+      | ls-401  | top |
+    Then the Trello client "update_list" should have been called with:
+      | argument | value  |
+      | list_id  | ls-401 |
+      | pos      | top    |
+
+  # --- archive_list ---
+  # Persistence validation (§4.3)
+
+  Scenario Outline: Archive a list
+    Given the Trello API will return an archived list with id "<list_id>"
+    When I call the "archive_list" tool with list_id "<list_id>"
+    Then the result should have field "id" with value "<list_id>"
+      And the result should have field "closed" with value "True"
+      And the Trello client "update_list" should have been called with:
+        | argument | value     |
+        | list_id  | <list_id> |
+        | closed   | true      |
+
+    Examples:
+      | list_id |
+      | ls-501  |
+      | ls-502  |

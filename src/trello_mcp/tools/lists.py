@@ -23,3 +23,26 @@ async def create_list(board_id: str, name: str) -> str:
         return json.dumps(ensure_ascii=False, obj={"id": lst.id, "name": lst.name})
     except TrelloAPIError as e:
         handle_api_error(e)
+
+
+@server.tool(description="Update a Trello list. Provide list_id and fields to update: name, pos (top/bottom/number). Returns the updated list.")
+async def update_list(list_id: str, name: str = "", pos: str = "") -> str:
+    try:
+        kwargs = {}
+        if name:
+            kwargs["name"] = name
+        if pos:
+            kwargs["pos"] = pos
+        lst = await get_client().update_list(list_id=list_id, **kwargs)
+        return json.dumps(ensure_ascii=False, obj={"id": lst.id, "name": lst.name})
+    except TrelloAPIError as e:
+        handle_api_error(e)
+
+
+@server.tool(description="Archive a Trello list (set closed=true). This hides the list from the board.")
+async def archive_list(list_id: str) -> str:
+    try:
+        lst = await get_client().update_list(list_id=list_id, closed=True)
+        return json.dumps(ensure_ascii=False, obj={"id": lst.id, "closed": lst.closed})
+    except TrelloAPIError as e:
+        handle_api_error(e)
