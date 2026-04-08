@@ -141,6 +141,43 @@ see GREEN. The existing 103 scenarios never regressed. This
 is the compound return of a BDD investment — each new feature
 builds on a verified foundation.
 
+## Zero HTTP Requests: A Fully Mocked Test Suite
+
+The entire BDD suite — 14 features, 115 scenarios, 691
+steps — runs without a single HTTP request to the Trello
+API. Every trellio client method is replaced by an
+`AsyncMock` that returns pre-configured Pydantic model
+instances. The suite completes in 0.16 seconds.
+
+This was not a compromise. It was a deliberate architectural
+decision with two consequences:
+
+**Speed enables discipline.** A 0.16-second feedback loop
+means RED → GREEN cycles take seconds, not minutes. During
+the session, `behave` was executed after every change — over
+30 times. With a live API backend, each run would have taken
+5-10 seconds (network latency × 115 scenarios), turning
+instant feedback into a drag. The speed of the mock suite is
+what made strict BDD cycles practical at this scale.
+
+**Isolation reveals the server's actual job.** The MCP
+server is a translation layer: it receives MCP tool calls,
+maps parameters to trellio method calls, formats the response
+as JSON, and translates errors. The mock suite tests exactly
+this — parameter mapping, response formatting, and error
+translation. It does not test whether trellio correctly talks
+to the Trello API, because that is trellio's own BDD suite's
+responsibility (117 scenarios against a mock HTTP server).
+
+The trade-off is real: the mock suite cannot detect protocol-
+level issues (stdio framing), credential problems, or
+trellio API changes. The E2E test against the live Trello API
+— performed once, manually, at the end of the session —
+caught exactly these issues. Both layers of testing were
+necessary, but for different reasons: the mock suite for
+development speed and regression safety, the E2E test for
+integration confidence.
+
 ## What the Guidelines Contributed
 
 ### §2.3 Anti-Hardcoding (Scenario Outlines)
