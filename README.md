@@ -52,6 +52,21 @@ Card tools support `pos` (top/bottom), `idLabels`
 
 ## Installation
 
+### From PyPI (recommended)
+
+```bash
+pip install trellio-mcp
+```
+
+Or run without installing via `pipx` or `uvx`:
+
+```bash
+pipx run trellio-mcp
+uvx trellio-mcp
+```
+
+### From source
+
 ```bash
 git clone https://github.com/scaratec/trellio-mcp.git
 cd trellio-mcp
@@ -66,7 +81,13 @@ python3 -m venv .venv
 Run the auth command on each machine:
 
 ```bash
-TRELLO_API_KEY=your_api_key .venv/bin/python -m trello_mcp auth
+TRELLO_API_KEY=your_api_key trellio-mcp auth
+```
+
+If using `pipx run`:
+
+```bash
+TRELLO_API_KEY=your_api_key pipx run trellio-mcp auth
 ```
 
 This opens a browser where you authorize the app. The token
@@ -98,8 +119,8 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`
 {
   "mcpServers": {
     "trello": {
-      "command": "/path/to/trellio-mcp/.venv/bin/python",
-      "args": ["-m", "trello_mcp"]
+      "command": "pipx",
+      "args": ["run", "trellio-mcp"]
     }
   }
 }
@@ -123,8 +144,8 @@ Add to `~/.claude/settings.json` or project
 {
   "mcpServers": {
     "trello": {
-      "command": "/path/to/trellio-mcp/.venv/bin/python",
-      "args": ["-m", "trello_mcp"]
+      "command": "pipx",
+      "args": ["run", "trellio-mcp"]
     }
   }
 }
@@ -138,8 +159,8 @@ Add to `~/.gemini/settings.json`:
 {
   "mcpServers": {
     "trello": {
-      "command": "/path/to/trellio-mcp/.venv/bin/python",
-      "args": ["-m", "trello_mcp"]
+      "command": "pipx",
+      "args": ["run", "trellio-mcp"]
     }
   }
 }

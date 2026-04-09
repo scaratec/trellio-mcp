@@ -4,12 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "trellio-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP server for Trello — manage boards, lists, cards, labels, checklists and more"
+readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "GPL-3.0-or-later"}
 authors = [
-    {name = "scaratec", url = "https://github.com/scaratec"},
+    {name = "scaratec"},
 ]
 keywords = ["trello", "mcp", "model-context-protocol", "claude", "gemini", "ai"]
 classifiers = [
