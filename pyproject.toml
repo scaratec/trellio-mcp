@@ -3,15 +3,38 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "trello-mcp"
+name = "trellio-mcp"
 version = "0.1.0"
-description = "MCP server for Trello via trellio"
+description = "MCP server for Trello — manage boards, lists, cards, labels, checklists and more"
 requires-python = ">=3.10"
 license = {text = "GPL-3.0-or-later"}
+authors = [
+    {name = "scaratec", url = "https://github.com/scaratec"},
+]
+keywords = ["trello", "mcp", "model-context-protocol", "claude", "gemini", "ai"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+]
 dependencies = [
     "mcp>=1.12.0",
-    "trellio @ git+https://github.com/scaratec/trellio.git@v1.0.0",
+    "trellio-client>=1.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/scaratec/trellio-mcp"
+Repository = "https://github.com/scaratec/trellio-mcp"
+Issues = "https://github.com/scaratec/trellio-mcp/issues"
+
+[project.scripts]
+trellio-mcp = "trello_mcp.__main__:main"
 
 [project.optional-dependencies]
 dev = [
