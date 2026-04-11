@@ -52,17 +52,25 @@ Card tools support `pos` (top/bottom), `idLabels`
 
 ## Installation
 
-### From PyPI (recommended)
+### Using pipx (recommended)
+
+To install globally so the `trellio-mcp` command is available in your PATH:
 
 ```bash
-pip install trellio-mcp
+pipx install trellio-mcp
 ```
 
-Or run without installing via `pipx` or `uvx`:
+Alternatively, you can run it on-the-fly without installing:
 
 ```bash
 pipx run trellio-mcp
-uvx trellio-mcp
+```
+*(Note: If you use `pipx run`, your MCP client configuration must also use `pipx` as the command and `run trellio-mcp` as arguments.)*
+
+### Using pip
+
+```bash
+pip install trellio-mcp
 ```
 
 ### From source
@@ -78,14 +86,14 @@ python3 -m venv .venv
 
 ### Interactive (recommended)
 
-Run the auth command on each machine:
+Run the auth command on each machine to connect your Trello account:
 
+If you installed globally (`pipx install` or `pip install`):
 ```bash
 TRELLO_API_KEY=your_api_key trellio-mcp auth
 ```
 
-If using `pipx run`:
-
+If using on-the-fly execution (`pipx run`):
 ```bash
 TRELLO_API_KEY=your_api_key pipx run trellio-mcp auth
 ```
