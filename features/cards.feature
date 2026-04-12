@@ -166,23 +166,39 @@ Feature: Card Tools
       | idLabels | lb-003,lb-004 |
 
   # --- add_label_to_card ---
-  # Persistence validation (§4.3)
+  # Persistence validation via independent channel (§4.3)
+  # The success response alone is the system's self-report and insufficient.
+  # Verification must happen through get_card as an independent read channel.
 
-  Scenario Outline: Add a label to a card
-    Given the Trello API will accept adding a label to a card
+  Scenario Outline: Add a label to a card and verify via get_card
+    Given a card "<card_id>" exists with name "<card_name>" and no labels
     When I call the "add_label_to_card" tool with:
       | card_id   | label_id   |
       | <card_id> | <label_id> |
     Then the result should confirm success
-      And the Trello client "add_label_to_card" should have been called with:
-        | argument | value      |
-        | card_id  | <card_id>  |
-        | label_id | <label_id> |
+    When I call the "get_card" tool with card_id "<card_id>"
+    Then the result field "idLabels" should be the list "<label_id>"
 
     Examples:
+      | card_id | card_name    | label_id |
+      | cd-100  | Bug Fix      | lb-001   |
+      | cd-200  | New Feature  | lb-002   |
+
+  # Anti-hardcoding (§2.3): two different label combinations prove
+  # that labels accumulate rather than replace.
+
+  Scenario: Adding two labels to the same card persists both
+    Given a card "cd-500" exists with name "Multi-Label Task" and no labels
+    When I call the "add_label_to_card" tool with:
       | card_id | label_id |
-      | cd-100  | lb-001   |
-      | cd-200  | lb-002   |
+      | cd-500  | lb-010   |
+    Then the result should confirm success
+    When I call the "add_label_to_card" tool with:
+      | card_id | label_id |
+      | cd-500  | lb-020   |
+    Then the result should confirm success
+    When I call the "get_card" tool with card_id "cd-500"
+    Then the result field "idLabels" should be the list "lb-010,lb-020"
 
   # --- remove_label_from_card ---
 

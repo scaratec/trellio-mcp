@@ -76,6 +76,21 @@ def step_call_list_cards(context, list_id):
     context.result = run_async(list_cards(list_id=list_id))
 
 
+@given('a card "{card_id}" exists with name "{name}" and no labels')
+def step_card_exists_no_labels(context, card_id, name):
+    """Stateful mock (§7.2): accumulates labels on add, returns them on get."""
+    card_labels = []
+
+    async def mock_add_label(card_id, label_id):
+        card_labels.append(label_id)
+
+    async def mock_get(card_id=card_id, **kwargs):
+        return TrelloCard(id=card_id, name=name, idList="ls-000", idLabels=card_labels)
+
+    context.mock_client.add_label_to_card.side_effect = mock_add_label
+    context.mock_client.get_card.side_effect = mock_get
+
+
 @given('the Trello API will accept adding a label to a card')
 def step_api_accepts_add_label(context):
     context.mock_client.add_label_to_card.return_value = None

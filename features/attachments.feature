@@ -25,40 +25,60 @@ Feature: Attachment Tools
       | cd-200  |
 
   # --- create_attachment ---
+  # Persistence validation via independent channel (§4.3)
+  # The create response is the system's self-report. Verification
+  # must happen through list_attachments as an independent read.
 
-  Scenario Outline: Create an attachment on a card
-    Given the Trello API will return a created attachment with id "<att_id>"
+  Scenario Outline: Create an attachment and verify via list_attachments
+    Given a card "<card_id>" has no attachments
     When I call the "create_attachment" tool with:
       | card_id   | url   | name   |
       | <card_id> | <url> | <name> |
-    Then the result should have field "id" with value "<att_id>"
-      And the result should have field "name" with value "<name>"
-      And the result should have field "url" with value "<url>"
-      And the Trello client "create_attachment" should have been called with:
-        | argument | value     |
-        | card_id  | <card_id> |
-        | url      | <url>     |
-        | name     | <name>    |
+    Then the result should have field "name" with value "<name>"
+    When I call the "list_attachments" tool with card_id "<card_id>"
+    Then the result should be a JSON list with 1 entries
+      And entry 0 should have field "name" with value "<name>"
+      And entry 0 should have field "url" with value "<url>"
 
     Examples:
-      | card_id | url                        | name      | att_id |
-      | cd-100  | https://example.com/doc    | doc.pdf   | at-101 |
-      | cd-200  | https://example.com/img    | image.png | at-202 |
+      | card_id | url                     | name      |
+      | cd-100  | https://example.com/doc | doc.pdf   |
+      | cd-200  | https://example.com/img | image.png |
+
+  # Anti-hardcoding (§2.3): two different attachments prove
+  # that attachments accumulate rather than replace.
+
+  Scenario: Creating two attachments on the same card persists both
+    Given a card "cd-500" has no attachments
+    When I call the "create_attachment" tool with:
+      | card_id | url                      | name      |
+      | cd-500  | https://example.com/spec | spec.pdf  |
+    Then the result should have field "name" with value "spec.pdf"
+    When I call the "create_attachment" tool with:
+      | card_id | url                        | name       |
+      | cd-500  | https://example.com/design | design.png |
+    Then the result should have field "name" with value "design.png"
+    When I call the "list_attachments" tool with card_id "cd-500"
+    Then the result should be a JSON list with 2 entries
+      And entry 0 should have field "name" with value "spec.pdf"
+      And entry 1 should have field "name" with value "design.png"
 
   # --- delete_attachment ---
+  # Persistence validation via independent channel (§4.3)
+  # Verify the attachment is actually gone after deletion.
 
-  Scenario Outline: Delete an attachment
-    Given the Trello API will accept attachment deletion
+  Scenario Outline: Delete an attachment and verify via list_attachments
+    Given a card "<card_id>" has attachments:
+      | id       | name   | url   |
+      | <att_id> | <name> | <url> |
     When I call the "delete_attachment" tool with:
       | card_id   | attachment_id |
       | <card_id> | <att_id>      |
     Then the result should confirm deletion
-      And the Trello client "delete_attachment" should have been called with:
-        | argument      | value     |
-        | card_id       | <card_id> |
-        | attachment_id | <att_id>  |
+    When I call the "list_attachments" tool with card_id "<card_id>"
+    Then the result should be a JSON list with 0 entries
 
     Examples:
-      | card_id | att_id |
-      | cd-100  | at-301 |
-      | cd-200  | at-302 |
+      | card_id | att_id | name      | url                     |
+      | cd-100  | at-301 | old.pdf   | https://example.com/old |
+      | cd-200  | at-302 | stale.png | https://example.com/x   |

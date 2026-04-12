@@ -20,6 +20,48 @@ def step_api_returns_created_attachment(context, att_id):
     context.mock_client.create_attachment.side_effect = mock_create
 
 
+@given('a card "{card_id}" has no attachments')
+def step_card_has_no_attachments(context, card_id):
+    """Stateful mock (§7.2): accumulates attachments on create,
+    returns them on list."""
+    store = []
+    counter = [0]
+
+    async def mock_create(card_id, url, name=None):
+        counter[0] += 1
+        att = TrelloAttachment(
+            id=f"at-auto-{counter[0]}", name=name or "", url=url,
+        )
+        store.append(att)
+        return att
+
+    async def mock_list(card_id=card_id, **kwargs):
+        return list(store)
+
+    context.mock_client.create_attachment.side_effect = mock_create
+    context.mock_client.list_attachments.side_effect = mock_list
+
+
+@given('a card "{card_id}" has attachments:')
+def step_card_has_attachments(context, card_id):
+    """Stateful mock (§7.2): pre-populated, removes on delete,
+    returns remainder on list."""
+    store = []
+    for row in context.table:
+        store.append(TrelloAttachment(
+            id=row["id"], name=row["name"], url=row["url"],
+        ))
+
+    async def mock_delete(card_id=card_id, attachment_id=None, **kw):
+        store[:] = [a for a in store if a.id != attachment_id]
+
+    async def mock_list(card_id=card_id, **kwargs):
+        return list(store)
+
+    context.mock_client.delete_attachment.side_effect = mock_delete
+    context.mock_client.list_attachments.side_effect = mock_list
+
+
 @given('the Trello API will accept attachment deletion')
 def step_api_accepts_attachment_deletion(context):
     context.mock_client.delete_attachment.return_value = None
