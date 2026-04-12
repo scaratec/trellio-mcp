@@ -76,11 +76,11 @@ def step_call_list_cards(context, list_id):
     context.result = run_async(list_cards(list_id=list_id))
 
 
-@given('a card "{card_id}" exists with name "{name}" and no labels')
-def step_card_exists_no_labels(context, card_id, name):
-    """Stateful mock (§7.2): tracks labels via get_card + update_card,
-    matching the read-modify-write pattern used by the MCP tool."""
-    card_labels = []
+def _setup_stateful_card_mock(context, card_id, name, initial_labels):
+    """Stateful mock (§7.2): simulates trellio-client >=1.2.0 behavior
+    where add/remove_label_to_card use read-modify-write via
+    get_card + update_card internally."""
+    card_labels = list(initial_labels)
 
     async def mock_get(card_id=card_id, **kwargs):
         return TrelloCard(id=card_id, name=name, idList="ls-000", idLabels=list(card_labels))
@@ -90,25 +90,28 @@ def step_card_exists_no_labels(context, card_id, name):
         card_labels[:] = [l for l in raw.split(",") if l] if raw else []
         return TrelloCard(id=card_id, name=name, idList="ls-000", idLabels=list(card_labels))
 
+    async def mock_add_label(card_id=card_id, label_id=None, **kwargs):
+        if label_id not in card_labels:
+            card_labels.append(label_id)
+
+    async def mock_remove_label(card_id=card_id, label_id=None, **kwargs):
+        card_labels[:] = [l for l in card_labels if l != label_id]
+
     context.mock_client.get_card.side_effect = mock_get
     context.mock_client.update_card.side_effect = mock_update
+    context.mock_client.add_label_to_card.side_effect = mock_add_label
+    context.mock_client.remove_label_from_card.side_effect = mock_remove_label
+
+
+@given('a card "{card_id}" exists with name "{name}" and no labels')
+def step_card_exists_no_labels(context, card_id, name):
+    _setup_stateful_card_mock(context, card_id, name, [])
 
 
 @given('a card "{card_id}" exists with name "{name}" and labels "{label_csv}"')
 def step_card_exists_with_labels(context, card_id, name, label_csv):
-    """Stateful mock (§7.2): pre-populated labels, supports remove via update_card."""
-    card_labels = [l.strip() for l in label_csv.split(",") if l.strip()]
-
-    async def mock_get(card_id=card_id, **kwargs):
-        return TrelloCard(id=card_id, name=name, idList="ls-000", idLabels=list(card_labels))
-
-    async def mock_update(card_id=card_id, **kwargs):
-        raw = kwargs.get("idLabels", "")
-        card_labels[:] = [l for l in raw.split(",") if l] if raw else []
-        return TrelloCard(id=card_id, name=name, idList="ls-000", idLabels=list(card_labels))
-
-    context.mock_client.get_card.side_effect = mock_get
-    context.mock_client.update_card.side_effect = mock_update
+    _setup_stateful_card_mock(context, card_id, name,
+                              [l.strip() for l in label_csv.split(",") if l.strip()])
 
 
 @given('the Trello API will accept adding a label to a card')

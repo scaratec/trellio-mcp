@@ -77,12 +77,7 @@ async def update_card(card_id: str, name: str = "", desc: str = "", idList: str 
 @server.tool(description="Add an existing label to a Trello card.")
 async def add_label_to_card(card_id: str, label_id: str) -> str:
     try:
-        client = get_client()
-        card = await client.get_card(card_id=card_id)
-        labels = list(card.id_labels)
-        if label_id not in labels:
-            labels.append(label_id)
-        await client.update_card(card_id, idLabels=",".join(labels))
+        await get_client().add_label_to_card(card_id=card_id, label_id=label_id)
         return json.dumps(ensure_ascii=False, obj={"success": True})
     except TrelloAPIError as e:
         handle_api_error(e)
@@ -91,10 +86,7 @@ async def add_label_to_card(card_id: str, label_id: str) -> str:
 @server.tool(description="Remove a label from a Trello card.")
 async def remove_label_from_card(card_id: str, label_id: str) -> str:
     try:
-        client = get_client()
-        card = await client.get_card(card_id=card_id)
-        labels = [lid for lid in card.id_labels if lid != label_id]
-        await client.update_card(card_id, idLabels=",".join(labels))
+        await get_client().remove_label_from_card(card_id=card_id, label_id=label_id)
         return json.dumps(ensure_ascii=False, obj={"success": True})
     except TrelloAPIError as e:
         handle_api_error(e)
