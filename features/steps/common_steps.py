@@ -54,6 +54,13 @@ def step_raw_result_contains(context, fragment):
     )
 
 
+@then('the result field "{field}" should be an empty list')
+def step_result_field_is_empty_list(context, field):
+    data = json.loads(context.result)
+    actual = data[field]
+    assert actual == [], f"Expected {field}=[], got {actual}"
+
+
 @then('the result field "{field}" should be the list "{csv}"')
 def step_result_field_is_list(context, field, csv):
     data = json.loads(context.result)

@@ -201,22 +201,21 @@ Feature: Card Tools
     Then the result field "idLabels" should be the list "lb-010,lb-020"
 
   # --- remove_label_from_card ---
+  # Persistence validation via independent channel (§4.3)
 
-  Scenario Outline: Remove a label from a card
-    Given the Trello API will accept removing a label from a card
+  Scenario Outline: Remove a label from a card and verify via get_card
+    Given a card "<card_id>" exists with name "<card_name>" and labels "<label_id>"
     When I call the "remove_label_from_card" tool with:
       | card_id   | label_id   |
       | <card_id> | <label_id> |
     Then the result should confirm success
-      And the Trello client "remove_label_from_card" should have been called with:
-        | argument | value      |
-        | card_id  | <card_id>  |
-        | label_id | <label_id> |
+    When I call the "get_card" tool with card_id "<card_id>"
+    Then the result field "idLabels" should be an empty list
 
     Examples:
-      | card_id | label_id |
-      | cd-100  | lb-001   |
-      | cd-200  | lb-002   |
+      | card_id | card_name     | label_id |
+      | cd-100  | Unlabel Fix   | lb-001   |
+      | cd-200  | Unlabel Feat  | lb-002   |
 
   # --- get_card ---
 
