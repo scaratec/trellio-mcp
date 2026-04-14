@@ -285,3 +285,38 @@ Feature: Card Tools
       | card_id |
       | cd-601  |
       | cd-602  |
+
+  # --- Archived list validation ---
+  # Prevent silent data loss when target list is archived (§4.3)
+
+  Scenario: Reject card creation in an archived list
+    Given the list "ls-archived" is archived with name "Done"
+    When I attempt to call "create_card" with:
+      | list_id     | name          |
+      | ls-archived | Ghost Card    |
+    Then the tool should raise an error
+      And the error message should contain "archived"
+
+  Scenario: Reject moving a card to an archived list
+    Given the list "ls-archived" is archived with name "Done"
+    When I attempt to call "update_card" with:
+      | card_id | idList      |
+      | cd-100  | ls-archived |
+    Then the tool should raise an error
+      And the error message should contain "archived"
+
+  Scenario: Allow card creation in an active list
+    Given the list "ls-active" is active with name "To Do"
+      And the Trello API will return a created card with id "cd-active-01"
+    When I call the "create_card" tool with:
+      | list_id   | name       |
+      | ls-active | Valid Card |
+    Then the result should have field "id" with value "cd-active-01"
+
+  Scenario: Allow moving a card to an active list
+    Given the list "ls-active" is active with name "To Do"
+      And the Trello API will return an updated card with id "cd-100" and name "Moved"
+    When I call the "update_card" tool with:
+      | card_id | idList    |
+      | cd-100  | ls-active |
+    Then the result should have field "id" with value "cd-100"

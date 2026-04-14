@@ -1,6 +1,6 @@
 from behave import given, when
-from trellio.models import TrelloCard
-from steps.common_steps import run_async
+from trellio.models import TrelloCard, TrelloList
+from steps.common_steps import run_async, capture_tool_error
 
 
 @given('the Trello API returns cards for list "{list_id}":')
@@ -178,3 +178,35 @@ def step_call_remove_label_from_card(context):
 def step_call_delete_card(context, card_id):
     from trello_mcp.tools.cards import delete_card
     context.result = run_async(delete_card(card_id=card_id))
+
+
+# --- Archived list validation ---
+
+@given('the list "{list_id}" is archived with name "{name}"')
+def step_list_is_archived(context, list_id, name):
+    async def mock_get_list(list_id=list_id, **kwargs):
+        return TrelloList(id=list_id, name=name, idBoard="bd-000", closed=True)
+    context.mock_client.get_list.side_effect = mock_get_list
+
+
+@given('the list "{list_id}" is active with name "{name}"')
+def step_list_is_active(context, list_id, name):
+    async def mock_get_list(list_id=list_id, **kwargs):
+        return TrelloList(id=list_id, name=name, idBoard="bd-000", closed=False)
+    context.mock_client.get_list.side_effect = mock_get_list
+
+
+@when('I attempt to call "create_card" with:')
+def step_attempt_create_card(context):
+    from trello_mcp.tools.cards import create_card
+    row = context.table[0]
+    kwargs = {"list_id": row["list_id"], "name": row["name"]}
+    capture_tool_error(context, create_card(**kwargs))
+
+
+@when('I attempt to call "update_card" with:')
+def step_attempt_update_card(context):
+    from trello_mcp.tools.cards import update_card
+    row = context.table[0]
+    kwargs = {h: row[h] for h in context.table.headings}
+    capture_tool_error(context, update_card(**kwargs))

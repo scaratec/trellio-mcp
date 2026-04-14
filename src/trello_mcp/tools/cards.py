@@ -1,7 +1,17 @@
 import json
+from mcp.server.fastmcp.exceptions import ToolError
 from trellio import TrelloAPIError
 from trello_mcp.server import server, get_client
 from trello_mcp.errors import handle_api_error
+
+
+async def _check_list_not_archived(client, list_id: str) -> None:
+    trello_list = await client.get_list(list_id=list_id)
+    if trello_list.closed:
+        raise ToolError(
+            f"Target list '{trello_list.name}' ({list_id}) is archived. "
+            f"Use an active list or unarchive it first."
+        )
 
 
 @server.tool(description="List all cards in a Trello list. Returns a JSON array with id, name, and desc for each card.")
@@ -19,6 +29,8 @@ async def list_cards(list_id: str) -> str:
 @server.tool(description="Create a new card in a Trello list. Optionally set position (top/bottom), labels (comma-separated label IDs), due date (ISO 8601), and dueComplete (true/false). Returns the created card with id and name.")
 async def create_card(list_id: str, name: str, desc: str = "", pos: str = "top", idLabels: str = "", due: str = "", dueComplete: str = "") -> str:
     try:
+        client = get_client()
+        await _check_list_not_archived(client, list_id)
         kwargs = {"list_id": list_id, "name": name, "pos": pos}
         if desc:
             kwargs["desc"] = desc
@@ -28,7 +40,7 @@ async def create_card(list_id: str, name: str, desc: str = "", pos: str = "top",
             kwargs["due"] = due
         if dueComplete:
             kwargs["dueComplete"] = dueComplete.lower() == "true"
-        card = await get_client().create_card(**kwargs)
+        card = await client.create_card(**kwargs)
         return json.dumps(ensure_ascii=False, obj={"id": card.id, "name": card.name})
     except TrelloAPIError as e:
         handle_api_error(e)
@@ -53,6 +65,9 @@ async def get_card(card_id: str) -> str:
 @server.tool(description="Update a Trello card. Provide card_id and fields to update: name, desc, idList, pos (top/bottom/number), idLabels (comma-separated label IDs), due (ISO 8601), dueComplete (true/false). Returns the updated card.")
 async def update_card(card_id: str, name: str = "", desc: str = "", idList: str = "", pos: str = "", idLabels: str = "", due: str = "", dueComplete: str = "") -> str:
     try:
+        client = get_client()
+        if idList:
+            await _check_list_not_archived(client, idList)
         kwargs = {}
         if name:
             kwargs["name"] = name
@@ -68,7 +83,7 @@ async def update_card(card_id: str, name: str = "", desc: str = "", idList: str 
             kwargs["dueComplete"] = dueComplete.lower() == "true"
         if idLabels:
             kwargs["idLabels"] = idLabels
-        card = await get_client().update_card(card_id=card_id, **kwargs)
+        card = await client.update_card(card_id=card_id, **kwargs)
         return json.dumps(ensure_ascii=False, obj={"id": card.id, "name": card.name})
     except TrelloAPIError as e:
         handle_api_error(e)
