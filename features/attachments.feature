@@ -82,3 +82,13 @@ Feature: Attachment Tools
       | card_id | att_id | name      | url                     |
       | cd-100  | at-301 | old.pdf   | https://example.com/old |
       | cd-200  | at-302 | stale.png | https://example.com/x   |
+
+  # --- Archived card validation ---
+
+  Scenario: Reject attachment creation on an archived card
+    Given the card "cd-archived" is archived with name "Old Task"
+    When I attempt to call "create_attachment" with:
+      | card_id     | url                      | name      |
+      | cd-archived | https://example.com/gone | ghost.pdf |
+    Then the tool should raise an error
+      And the error message should contain "archived"

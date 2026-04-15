@@ -115,3 +115,13 @@ Feature: Checklist Tools
       | cl_id  | ci_id  |
       | cl-401 | ci-401 |
       | cl-402 | ci-402 |
+
+  # --- Archived card validation ---
+
+  Scenario: Reject checklist creation on an archived card
+    Given the card "cd-archived" is archived with name "Old Task"
+    When I attempt to call "create_checklist" with:
+      | card_id     | name        |
+      | cd-archived | Ghost Steps |
+    Then the tool should raise an error
+      And the error message should contain "archived"

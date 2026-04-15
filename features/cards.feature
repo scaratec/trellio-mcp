@@ -320,3 +320,21 @@ Feature: Card Tools
       | card_id | idList    |
       | cd-100  | ls-active |
     Then the result should have field "id" with value "cd-100"
+
+  # --- Archived card validation ---
+
+  Scenario: Reject adding a label to an archived card
+    Given the card "cd-archived" is archived with name "Old Task"
+    When I attempt to call "add_label_to_card" with:
+      | card_id     | label_id |
+      | cd-archived | lb-001   |
+    Then the tool should raise an error
+      And the error message should contain "archived"
+
+  Scenario: Reject removing a label from an archived card
+    Given the card "cd-archived" is archived with name "Old Task"
+    When I attempt to call "remove_label_from_card" with:
+      | card_id     | label_id |
+      | cd-archived | lb-001   |
+    Then the tool should raise an error
+      And the error message should contain "archived"

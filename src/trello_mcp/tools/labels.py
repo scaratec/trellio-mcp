@@ -2,6 +2,7 @@ import json
 from trellio import TrelloAPIError
 from trello_mcp.server import server, get_client
 from trello_mcp.errors import handle_api_error
+from trello_mcp.tools.validation import check_board_not_archived
 
 
 @server.tool(description="List all labels on a Trello board. Returns a JSON array with id, name, and color for each label.")
@@ -19,7 +20,9 @@ async def list_board_labels(board_id: str) -> str:
 @server.tool(description="Create a label on a Trello board. Returns the created label with id, name, and color.")
 async def create_label(board_id: str, name: str, color: str) -> str:
     try:
-        label = await get_client().create_label(
+        client = get_client()
+        await check_board_not_archived(client, board_id)
+        label = await client.create_label(
             name=name, color=color, board_id=board_id,
         )
         return json.dumps(ensure_ascii=False, obj={"id": label.id, "name": label.name, "color": label.color})

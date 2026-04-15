@@ -2,6 +2,7 @@ import json
 from trellio import TrelloAPIError
 from trello_mcp.server import server, get_client
 from trello_mcp.errors import handle_api_error
+from trello_mcp.tools.validation import check_board_not_archived
 
 
 @server.tool(description="List all Trello webhooks. Returns a JSON array with id, description, callbackURL, and active status.")
@@ -24,7 +25,12 @@ async def list_webhooks() -> str:
 @server.tool(description="Create a Trello webhook. Returns the created webhook with id and callbackURL.")
 async def create_webhook(callback_url: str, id_model: str, description: str = "") -> str:
     try:
-        wh = await get_client().create_webhook(
+        client = get_client()
+        try:
+            await check_board_not_archived(client, id_model)
+        except TrelloAPIError:
+            pass  # id_model is not a board — skip validation
+        wh = await client.create_webhook(
             callback_url=callback_url,
             id_model=id_model,
             description=description or None,

@@ -1,17 +1,8 @@
 import json
-from mcp.server.fastmcp.exceptions import ToolError
 from trellio import TrelloAPIError
 from trello_mcp.server import server, get_client
 from trello_mcp.errors import handle_api_error
-
-
-async def _check_list_not_archived(client, list_id: str) -> None:
-    trello_list = await client.get_list(list_id=list_id)
-    if trello_list.closed:
-        raise ToolError(
-            f"Target list '{trello_list.name}' ({list_id}) is archived. "
-            f"Use an active list or unarchive it first."
-        )
+from trello_mcp.tools.validation import check_list_not_archived, check_card_not_archived
 
 
 @server.tool(description="List all cards in a Trello list. Returns a JSON array with id, name, and desc for each card.")
@@ -30,7 +21,7 @@ async def list_cards(list_id: str) -> str:
 async def create_card(list_id: str, name: str, desc: str = "", pos: str = "top", idLabels: str = "", due: str = "", dueComplete: str = "") -> str:
     try:
         client = get_client()
-        await _check_list_not_archived(client, list_id)
+        await check_list_not_archived(client, list_id)
         kwargs = {"list_id": list_id, "name": name, "pos": pos}
         if desc:
             kwargs["desc"] = desc
@@ -67,7 +58,7 @@ async def update_card(card_id: str, name: str = "", desc: str = "", idList: str 
     try:
         client = get_client()
         if idList:
-            await _check_list_not_archived(client, idList)
+            await check_list_not_archived(client, idList)
         kwargs = {}
         if name:
             kwargs["name"] = name
@@ -92,7 +83,9 @@ async def update_card(card_id: str, name: str = "", desc: str = "", idList: str 
 @server.tool(description="Add an existing label to a Trello card.")
 async def add_label_to_card(card_id: str, label_id: str) -> str:
     try:
-        await get_client().add_label_to_card(card_id=card_id, label_id=label_id)
+        client = get_client()
+        await check_card_not_archived(client, card_id)
+        await client.add_label_to_card(card_id=card_id, label_id=label_id)
         return json.dumps(ensure_ascii=False, obj={"success": True})
     except TrelloAPIError as e:
         handle_api_error(e)
@@ -101,7 +94,9 @@ async def add_label_to_card(card_id: str, label_id: str) -> str:
 @server.tool(description="Remove a label from a Trello card.")
 async def remove_label_from_card(card_id: str, label_id: str) -> str:
     try:
-        await get_client().remove_label_from_card(card_id=card_id, label_id=label_id)
+        client = get_client()
+        await check_card_not_archived(client, card_id)
+        await client.remove_label_from_card(card_id=card_id, label_id=label_id)
         return json.dumps(ensure_ascii=False, obj={"success": True})
     except TrelloAPIError as e:
         handle_api_error(e)

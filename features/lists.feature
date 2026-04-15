@@ -99,3 +99,13 @@ Feature: List Tools
       | list_id |
       | ls-501  |
       | ls-502  |
+
+  # --- Archived board validation ---
+
+  Scenario: Reject list creation on an archived board
+    Given the board "bd-archived" is archived with name "Old Project"
+    When I attempt to call "create_list" with:
+      | board_id    | name      |
+      | bd-archived | Ghost List |
+    Then the tool should raise an error
+      And the error message should contain "archived"

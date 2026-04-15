@@ -86,3 +86,13 @@ Feature: Webhook Tools
       | wh_id  |
       | wh-501 |
       | wh-502 |
+
+  # --- Archived board validation ---
+
+  Scenario: Reject webhook creation on an archived board
+    Given the board "bd-archived" is archived with name "Old Project"
+    When I attempt to call "create_webhook" with:
+      | callback_url              | id_model    |
+      | https://example.com/hook  | bd-archived |
+    Then the tool should raise an error
+      And the error message should contain "archived"

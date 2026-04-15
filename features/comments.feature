@@ -77,3 +77,13 @@ Feature: Comment Tools
       | cm_id  |
       | cm-401 |
       | cm-402 |
+
+  # --- Archived card validation ---
+
+  Scenario: Reject adding a comment to an archived card
+    Given the card "cd-archived" is archived with name "Old Task"
+    When I attempt to call "add_comment" with:
+      | card_id     | text         |
+      | cd-archived | Ghost note   |
+    Then the tool should raise an error
+      And the error message should contain "archived"
