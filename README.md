@@ -12,7 +12,7 @@ the [BDD Guidelines v1.8.0](https://github.com/scaratec/burn-your-code).
 
 ## Features
 
-- **40 MCP tools** — 1:1 mapping to trellio methods, plus
+- **46 MCP tools** — 1:1 mapping to trellio methods, plus
   one composite `get_board_overview` tool
 - **2 resource templates** — `trello://board/{id}` and
   `trello://card/{id}` for rich context loading
@@ -31,13 +31,13 @@ the [BDD Guidelines v1.8.0](https://github.com/scaratec/burn-your-code).
 |-------------|-------|-------|
 | Discovery   | `list_boards`, `search` | 2 |
 | Boards      | `get_board_overview`, `create_board`, `get_board`, `update_board`, `delete_board` | 5 |
-| Lists       | `list_lists`, `create_list` | 2 |
+| Lists       | `list_lists`, `create_list`, `update_list`, `archive_list` | 4 |
 | Cards       | `list_cards`, `create_card`, `get_card`, `update_card`, `delete_card`, `add_label_to_card`, `remove_label_from_card` | 7 |
 | Labels      | `list_board_labels`, `create_label`, `update_label`, `delete_label` | 4 |
 | Checklists  | `list_card_checklists`, `create_checklist`, `delete_checklist`, `create_check_item`, `update_check_item`, `delete_check_item` | 6 |
 | Comments    | `list_comments`, `add_comment`, `update_comment`, `delete_comment` | 4 |
 | Members     | `get_me`, `list_board_members`, `get_member` | 3 |
-| Attachments | `list_attachments`, `create_attachment`, `delete_attachment` | 3 |
+| Attachments | `list_attachments`, `create_attachment`, `get_attachment`, `upload_attachment`, `download_attachment`, `delete_attachment` | 6 |
 | Webhooks    | `list_webhooks`, `create_webhook`, `get_webhook`, `update_webhook`, `delete_webhook` | 5 |
 
 Card tools support `pos` (top/bottom), `idLabels`
@@ -197,7 +197,7 @@ Trello API
 | 002 | stdio transport — no network attack surface |
 | 003 | Stored credentials with env var fallback |
 | 004 | 1:1 tool mapping — one tool per trellio method |
-| 005 | trellio as Git dependency pinned to v1.0.0 |
+| 005 | trellio as PyPI dependency (>=1.4.0) |
 | 006 | Tools + Resources + Prompts as MCP capabilities |
 | 007 | `isError=true` + structured error content |
 
@@ -212,9 +212,9 @@ PYTHONPATH=src .venv/bin/python -m behave
 ```
 
 ```
-15 features passed, 0 failed, 0 skipped
-122 scenarios passed, 0 failed, 0 skipped
-732 steps passed, 0 failed, 0 skipped
+17 features passed, 0 failed, 0 skipped
+159 scenarios passed, 0 failed, 0 skipped
+946 steps passed, 0 failed, 0 skipped
 ```
 
 Test architecture:
@@ -223,8 +223,7 @@ Test architecture:
 - Persistence validation via mock call records (§4.3)
 - Anti-hardcoding via Scenario Outlines with >= 2 variants
   (§2.3)
-- Layer-by-layer failure path enumeration: 11 error scenarios
-  (§4.5)
+- Layer-by-layer failure path enumeration (§4.5)
 - Independent spec audit per §13
 
 See [Case Study](docs/case-study-bdd-mcp-server.md) for a
@@ -240,10 +239,10 @@ trellio-mcp/
 │   ├── server.py          # FastMCP instance + client mgmt
 │   ├── auth.py            # OAuth flow + credential storage
 │   ├── errors.py          # Error translation (ADR 007)
-│   ├── tools/             # 10 modules, 40 tools
+│   ├── tools/             # 10 modules, 46 tools
 │   ├── resources.py       # 2 resource templates
 │   └── prompts.py         # 3 prompts
-├── features/              # 15 BDD feature files
+├── features/              # 17 BDD feature files
 │   └── steps/             # Step definitions
 ├── docs/
 │   ├── adr/               # 7 Architecture Decision Records
