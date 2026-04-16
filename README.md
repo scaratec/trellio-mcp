@@ -52,6 +52,14 @@ Card tools support `pos` (top/bottom), `idLabels`
 
 ## Installation
 
+### Smithery
+
+[![smithery badge](https://smithery.ai/badge/gupta/trellio-mcp)](https://smithery.ai/server/gupta/trellio-mcp)
+
+```bash
+npx @smithery/cli install gupta/trellio-mcp --client claude
+```
+
 ### Using pipx (recommended)
 
 To install globally so the `trellio-mcp` command is available in your PATH:
@@ -250,6 +258,25 @@ trellio-mcp/
 │   └── case-study-bdd-mcp-server.md
 └── pyproject.toml
 ```
+
+## Publishing
+
+### PyPI
+
+```bash
+uv build
+twine upload dist/trellio_mcp-<version>*
+```
+
+### Smithery
+
+Namespace is `gupta`. Update the release after a new PyPI version:
+
+```bash
+npx @smithery/cli mcp publish "https://github.com/scaratec/trellio-mcp" -n gupta/trellio-mcp
+```
+
+Also update the pinned version in `smithery.yaml` `commandFunction`.
 
 ## License
 
