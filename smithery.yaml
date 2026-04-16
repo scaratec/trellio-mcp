@@ -1,0 +1,21 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+
+configSchema:
+  type: object
+  required:
+    - trelloApiKey
+    - trelloToken
+  properties:
+    trelloApiKey:
+      type: string
+      description: "Trello API Key (from https://trello.com/power-ups/admin)"
+    trelloToken:
+      type: string
+      description: "Trello API Token"
+
+commandFunction:
+  |-
+    (config) => ({ command: 'uvx', args: ['trellio-mcp==0.11.0'], env: { TRELLO_API_KEY: config.trelloApiKey, TRELLO_TOKEN: config.trelloToken } })
