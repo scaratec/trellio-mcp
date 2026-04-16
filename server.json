@@ -1,0 +1,37 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.scaratec/trellio-mcp",
+  "title": "Trello",
+  "description": "MCP server for Trello — manage boards, lists, cards, attachments and more via Claude or Gemini",
+  "repository": {
+    "url": "https://github.com/scaratec/trellio-mcp",
+    "source": "github"
+  },
+  "version": "0.11.1",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "trellio-mcp",
+      "version": "0.11.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "TRELLO_API_KEY",
+          "description": "Trello API Key (from https://trello.com/power-ups/admin)",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true
+        },
+        {
+          "name": "TRELLO_TOKEN",
+          "description": "Trello API Token",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

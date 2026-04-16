@@ -4,6 +4,8 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![MCP](https://img.shields.io/badge/MCP-stdio-green.svg)](https://modelcontextprotocol.io)
 
+<!-- mcp-name: io.github.scaratec/trellio-mcp -->
+
 An MCP server that gives Claude Desktop, Claude Code, and
 Gemini CLI full access to the Trello API. Built on the
 [trellio](https://github.com/scaratec/trellio) async client
