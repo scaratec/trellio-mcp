@@ -63,6 +63,23 @@ Feature: Attachment Tools
       And entry 0 should have field "name" with value "spec.pdf"
       And entry 1 should have field "name" with value "design.png"
 
+  # --- get_attachment ---
+  # Anti-hardcoding (§2.3): Two different attachments prove
+  # that get returns the correct individual metadata.
+
+  Scenario Outline: Get a single attachment by ID
+    Given the Trello API returns attachment "<att_id>" for card "<card_id>":
+      | id       | name   | url   |
+      | <att_id> | <name> | <url> |
+    When I call the "get_attachment" tool with card_id "<card_id>" and attachment_id "<att_id>"
+    Then the result should have field "name" with value "<name>"
+      And the result should have field "url" with value "<url>"
+
+    Examples:
+      | card_id | att_id | name       | url                        |
+      | cd-100  | at-501 | spec.pdf   | https://example.com/spec   |
+      | cd-200  | at-502 | design.png | https://example.com/design |
+
   # --- delete_attachment ---
   # Persistence validation via independent channel (§4.3)
   # Verify the attachment is actually gone after deletion.

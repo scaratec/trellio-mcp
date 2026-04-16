@@ -82,6 +82,22 @@ def step_call_create_attachment(context):
     ))
 
 
+@given('the Trello API returns attachment "{att_id}" for card "{card_id}":')
+def step_api_returns_single_attachment(context, att_id, card_id):
+    row = context.table[0]
+    att = TrelloAttachment(id=row["id"], name=row["name"], url=row["url"])
+
+    async def mock_get(card_id, attachment_id, **kwargs):
+        return att
+    context.mock_client.get_attachment.side_effect = mock_get
+
+
+@when('I call the "get_attachment" tool with card_id "{card_id}" and attachment_id "{att_id}"')
+def step_call_get_attachment(context, card_id, att_id):
+    from trello_mcp.tools.attachments import get_attachment
+    context.result = run_async(get_attachment(card_id=card_id, attachment_id=att_id))
+
+
 @when('I call the "delete_attachment" tool with:')
 def step_call_delete_attachment(context):
     from trello_mcp.tools.attachments import delete_attachment

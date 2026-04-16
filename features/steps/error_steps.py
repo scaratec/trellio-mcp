@@ -29,6 +29,12 @@ def step_api_fail_list_cards(context, status, message):
     context.mock_client.list_cards.side_effect = TrelloAPIError(status, message)
 
 
+@given('the Trello API will fail on get_attachment with status {status:d} and message "{message}"')
+def step_api_fail_get_attachment(context, status, message):
+    context.mock_client.get_attachment.side_effect = TrelloAPIError(status, message)
+    context.mock_client.download_attachment.side_effect = TrelloAPIError(status, message)
+
+
 @when('I attempt to call the "list_boards" tool')
 def step_attempt_list_boards(context):
     from trello_mcp.tools.boards import list_boards
