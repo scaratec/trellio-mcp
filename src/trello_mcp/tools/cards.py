@@ -102,7 +102,25 @@ async def remove_label_from_card(card_id: str, label_id: str) -> str:
         handle_api_error(e)
 
 
-@server.tool(description="Delete a Trello card permanently. This action cannot be undone.")
+@server.tool(description="Archive a Trello card (set closed=true). The card is hidden from the board but preserved with its history, attachments and comments. Reversible via unarchive_card. For permanent removal use delete_card.")
+async def archive_card(card_id: str) -> str:
+    try:
+        card = await get_client().update_card(card_id=card_id, closed=True)
+        return json.dumps(ensure_ascii=False, obj={"id": card.id, "closed": card.closed})
+    except TrelloAPIError as e:
+        handle_api_error(e)
+
+
+@server.tool(description="Unarchive a Trello card (set closed=false). Restores the card to its list.")
+async def unarchive_card(card_id: str) -> str:
+    try:
+        card = await get_client().update_card(card_id=card_id, closed=False)
+        return json.dumps(ensure_ascii=False, obj={"id": card.id, "closed": card.closed})
+    except TrelloAPIError as e:
+        handle_api_error(e)
+
+
+@server.tool(description="Delete a Trello card permanently. This action cannot be undone. To hide a card while preserving it, use archive_card instead.")
 async def delete_card(card_id: str) -> str:
     try:
         await get_client().delete_card(card_id=card_id)

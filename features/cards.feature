@@ -271,6 +271,44 @@ Feature: Card Tools
       | cd-501  | Renamed Card     |
       | cd-502  | Updated Feature  |
 
+  # --- archive_card ---
+  # Archive is reversible (sets closed=true); distinct from delete_card.
+  # Anti-hardcoding (§2.3): Two variants prove the tool generalises.
+  # Persistence validation (§4.3): verify the update_card call passed closed=true.
+
+  Scenario Outline: Archive a card
+    Given the Trello API will return an archived card with id "<card_id>"
+    When I call the "archive_card" tool with card_id "<card_id>"
+    Then the result should have field "id" with value "<card_id>"
+      And the result should have field "closed" with value "True"
+      And the Trello client "update_card" should have been called with:
+        | argument | value     |
+        | card_id  | <card_id> |
+        | closed   | true      |
+
+    Examples:
+      | card_id |
+      | cd-701  |
+      | cd-702  |
+
+  # --- unarchive_card ---
+  # Restore a previously archived card (sets closed=false).
+
+  Scenario Outline: Unarchive a card
+    Given the Trello API will return an unarchived card with id "<card_id>"
+    When I call the "unarchive_card" tool with card_id "<card_id>"
+    Then the result should have field "id" with value "<card_id>"
+      And the result should have field "closed" with value "False"
+      And the Trello client "update_card" should have been called with:
+        | argument | value     |
+        | card_id  | <card_id> |
+        | closed   | false     |
+
+    Examples:
+      | card_id |
+      | cd-801  |
+      | cd-802  |
+
   # --- delete_card ---
 
   Scenario Outline: Delete a card

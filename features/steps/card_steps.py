@@ -180,6 +180,38 @@ def step_call_delete_card(context, card_id):
     context.result = run_async(delete_card(card_id=card_id))
 
 
+@given('the Trello API will return an archived card with id "{card_id}"')
+def step_api_returns_archived_card(context, card_id):
+    async def mock_update(card_id, **kwargs):
+        return TrelloCard(
+            id=card_id, name="Archived", idList="ls-000",
+            closed=kwargs.get("closed", True),
+        )
+    context.mock_client.update_card.side_effect = mock_update
+
+
+@given('the Trello API will return an unarchived card with id "{card_id}"')
+def step_api_returns_unarchived_card(context, card_id):
+    async def mock_update(card_id, **kwargs):
+        return TrelloCard(
+            id=card_id, name="Active", idList="ls-000",
+            closed=kwargs.get("closed", False),
+        )
+    context.mock_client.update_card.side_effect = mock_update
+
+
+@when('I call the "archive_card" tool with card_id "{card_id}"')
+def step_call_archive_card(context, card_id):
+    from trello_mcp.tools.cards import archive_card
+    context.result = run_async(archive_card(card_id=card_id))
+
+
+@when('I call the "unarchive_card" tool with card_id "{card_id}"')
+def step_call_unarchive_card(context, card_id):
+    from trello_mcp.tools.cards import unarchive_card
+    context.result = run_async(unarchive_card(card_id=card_id))
+
+
 # --- Archived list validation ---
 
 @given('the list "{list_id}" is archived with name "{name}"')

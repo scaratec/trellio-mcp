@@ -14,7 +14,7 @@ the [BDD Guidelines v1.8.0](https://github.com/scaratec/burn-your-code).
 
 ## Features
 
-- **46 MCP tools** — 1:1 mapping to trellio methods, plus
+- **48 MCP tools** — 1:1 mapping to trellio methods, plus
   one composite `get_board_overview` tool
 - **2 resource templates** — `trello://board/{id}` and
   `trello://card/{id}` for rich context loading
@@ -34,7 +34,7 @@ the [BDD Guidelines v1.8.0](https://github.com/scaratec/burn-your-code).
 | Discovery   | `list_boards`, `search` | 2 |
 | Boards      | `get_board_overview`, `create_board`, `get_board`, `update_board`, `delete_board` | 5 |
 | Lists       | `list_lists`, `create_list`, `update_list`, `archive_list` | 4 |
-| Cards       | `list_cards`, `create_card`, `get_card`, `update_card`, `delete_card`, `add_label_to_card`, `remove_label_from_card` | 7 |
+| Cards       | `list_cards`, `create_card`, `get_card`, `update_card`, `archive_card`, `unarchive_card`, `delete_card`, `add_label_to_card`, `remove_label_from_card` | 9 |
 | Labels      | `list_board_labels`, `create_label`, `update_label`, `delete_label` | 4 |
 | Checklists  | `list_card_checklists`, `create_checklist`, `delete_checklist`, `create_check_item`, `update_check_item`, `delete_check_item` | 6 |
 | Comments    | `list_comments`, `add_comment`, `update_comment`, `delete_comment` | 4 |
@@ -223,8 +223,8 @@ PYTHONPATH=src .venv/bin/python -m behave
 
 ```
 17 features passed, 0 failed, 0 skipped
-159 scenarios passed, 0 failed, 0 skipped
-946 steps passed, 0 failed, 0 skipped
+163 scenarios passed, 0 failed, 0 skipped
+970 steps passed, 0 failed, 0 skipped
 ```
 
 Test architecture:
@@ -249,7 +249,7 @@ trellio-mcp/
 │   ├── server.py          # FastMCP instance + client mgmt
 │   ├── auth.py            # OAuth flow + credential storage
 │   ├── errors.py          # Error translation (ADR 007)
-│   ├── tools/             # 10 modules, 46 tools
+│   ├── tools/             # 10 modules, 48 tools
 │   ├── resources.py       # 2 resource templates
 │   └── prompts.py         # 3 prompts
 ├── features/              # 17 BDD feature files

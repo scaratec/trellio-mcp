@@ -18,4 +18,4 @@ configSchema:
 
 commandFunction:
   |-
-    (config) => ({ command: 'uvx', args: ['trellio-mcp==0.11.1'], env: { TRELLO_API_KEY: config.trelloApiKey, TRELLO_TOKEN: config.trelloToken } })
+    (config) => ({ command: 'uvx', args: ['trellio-mcp==0.12.0'], env: { TRELLO_API_KEY: config.trelloApiKey, TRELLO_TOKEN: config.trelloToken } })
