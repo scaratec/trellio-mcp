@@ -24,10 +24,33 @@ def step_api_returns_empty_search(context):
     )
 
 
+@given('the Trello API returns a card hit for query "{query}" with:')
+def step_api_returns_card_hit(context, query):
+    row = context.table[0]
+    label_csv = row.get("idLabels", "") or ""
+    labels = [l.strip() for l in label_csv.split(",") if l.strip()]
+    card = TrelloCard(
+        id=row["id"],
+        name=row["name"],
+        idList=row["idList"],
+        desc=row.get("desc", "") or "",
+        idLabels=labels,
+    )
+    context.mock_client.search.return_value = TrelloSearchResult(
+        boards=[], cards=[card],
+    )
+
+
 @when('I call the "search" tool with query "{query}"')
 def step_call_search(context, query):
     from trello_mcp.tools.search import search
     context.result = run_async(search(query=query))
+
+
+@when('I call the "search" tool scoped to board "{board_id}" with query "{query}"')
+def step_call_search_with_board(context, board_id, query):
+    from trello_mcp.tools.search import search
+    context.result = run_async(search(query=query, id_board=board_id))
 
 
 @then('the result should have field "{field}" as a list with {count:d} entry')
@@ -51,3 +74,13 @@ def step_nested_field(context, field, index, subfield, value):
     data = json.loads(context.result)
     actual = str(data[field][index][subfield])
     assert actual == value, f"Expected {subfield}={value}, got {actual}"
+
+
+@then('in "{field}" entry {index:d} field "{subfield}" should be the list "{csv}"')
+def step_nested_field_list(context, field, index, subfield, csv):
+    data = json.loads(context.result)
+    actual = data[field][index][subfield]
+    expected = [v.strip() for v in csv.split(",") if v.strip()]
+    assert actual == expected, (
+        f"Expected {subfield}={expected}, got {actual}"
+    )

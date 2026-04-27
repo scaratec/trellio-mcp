@@ -27,15 +27,19 @@ def step_api_accepts_checklist_deletion(context):
 
 @given('the Trello API will return a created check item with id "{ci_id}"')
 def step_api_returns_created_check_item(context, ci_id):
-    async def mock_create(checklist_id, name):
+    async def mock_create(checklist_id, name, **kwargs):
         return TrelloCheckItem(id=ci_id, name=name, state="incomplete")
     context.mock_client.create_check_item.side_effect = mock_create
 
 
 @given('the Trello API will return an updated check item with id "{ci_id}" name "{name}" and state "{state}"')
 def step_api_returns_updated_check_item(context, ci_id, name, state):
-    async def mock_update(card_id, check_item_id, state):
-        return TrelloCheckItem(id=check_item_id, name=name, state=state)
+    async def mock_update(card_id, check_item_id, **kwargs):
+        return TrelloCheckItem(
+            id=check_item_id,
+            name=kwargs.get("name", name),
+            state=kwargs.get("state", state),
+        )
     context.mock_client.update_check_item.side_effect = mock_update
 
 
@@ -69,20 +73,18 @@ def step_call_delete_checklist(context, cl_id):
 def step_call_create_check_item(context):
     from trello_mcp.tools.checklists import create_check_item
     row = context.table[0]
-    context.result = run_async(create_check_item(
-        checklist_id=row["checklist_id"], name=row["name"],
-    ))
+    kwargs = {"checklist_id": row["checklist_id"], "name": row["name"]}
+    if "pos" in context.table.headings:
+        kwargs["pos"] = row["pos"]
+    context.result = run_async(create_check_item(**kwargs))
 
 
 @when('I call the "update_check_item" tool with:')
 def step_call_update_check_item(context):
     from trello_mcp.tools.checklists import update_check_item
     row = context.table[0]
-    context.result = run_async(update_check_item(
-        card_id=row["card_id"],
-        check_item_id=row["check_item_id"],
-        state=row["state"],
-    ))
+    kwargs = {h: row[h] for h in context.table.headings}
+    context.result = run_async(update_check_item(**kwargs))
 
 
 @when('I call the "delete_check_item" tool with:')

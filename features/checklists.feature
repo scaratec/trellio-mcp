@@ -98,6 +98,59 @@ Feature: Checklist Tools
       | cd-100  | ci-301 | complete   | Run migrations |
       | cd-200  | ci-302 | incomplete | Smoke test     |
 
+  Scenario Outline: Update a check item name
+    Given the Trello API will return an updated check item with id "<ci_id>" name "<new_name>" and state "incomplete"
+    When I call the "update_check_item" tool with:
+      | card_id   | check_item_id | name       |
+      | <card_id> | <ci_id>       | <new_name> |
+    Then the result should have field "id" with value "<ci_id>"
+      And the result should have field "name" with value "<new_name>"
+      And the Trello client "update_check_item" should have been called with:
+        | argument      | value      |
+        | card_id       | <card_id>  |
+        | check_item_id | <ci_id>    |
+        | name          | <new_name> |
+
+    Examples:
+      | card_id | ci_id  | new_name           |
+      | cd-100  | ci-401 | Renamed migrations |
+      | cd-200  | ci-402 | Renamed smoke      |
+
+  Scenario Outline: Update a check item position
+    Given the Trello API will return an updated check item with id "<ci_id>" name "Item" and state "incomplete"
+    When I call the "update_check_item" tool with:
+      | card_id   | check_item_id | pos   |
+      | <card_id> | <ci_id>       | <pos> |
+    Then the result should have field "id" with value "<ci_id>"
+      And the Trello client "update_check_item" should have been called with:
+        | argument      | value     |
+        | card_id       | <card_id> |
+        | check_item_id | <ci_id>   |
+        | pos           | <pos>     |
+
+    Examples:
+      | card_id | ci_id  | pos    |
+      | cd-100  | ci-501 | top    |
+      | cd-200  | ci-502 | bottom |
+
+  Scenario Outline: Create a check item with a position
+    Given the Trello API will return a created check item with id "<ci_id>"
+    When I call the "create_check_item" tool with:
+      | checklist_id | name   | pos   |
+      | <cl_id>      | <name> | <pos> |
+    Then the result should have field "id" with value "<ci_id>"
+      And the result should have field "name" with value "<name>"
+      And the Trello client "create_check_item" should have been called with:
+        | argument     | value   |
+        | checklist_id | <cl_id> |
+        | name         | <name>  |
+        | pos          | <pos>   |
+
+    Examples:
+      | cl_id  | name        | pos    | ci_id  |
+      | cl-100 | Top item    | top    | ci-601 |
+      | cl-200 | Bottom item | bottom | ci-602 |
+
   # --- delete_check_item ---
 
   Scenario Outline: Delete a check item

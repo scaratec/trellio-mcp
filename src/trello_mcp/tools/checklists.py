@@ -37,23 +37,29 @@ async def delete_checklist(checklist_id: str) -> str:
         handle_api_error(e)
 
 
-@server.tool(description="Create a check item in a Trello checklist. Returns the created item with id, name, and state.")
-async def create_check_item(checklist_id: str, name: str) -> str:
+@server.tool(description="Create a check item in a Trello checklist. Optionally set position (top/bottom/numeric). Returns the created item with id, name, and state.")
+async def create_check_item(checklist_id: str, name: str, pos: str = "") -> str:
     try:
-        item = await get_client().create_check_item(
-            checklist_id=checklist_id, name=name,
-        )
+        kwargs = {"checklist_id": checklist_id, "name": name}
+        if pos:
+            kwargs["pos"] = pos
+        item = await get_client().create_check_item(**kwargs)
         return json.dumps(ensure_ascii=False, obj={"id": item.id, "name": item.name, "state": item.state})
     except TrelloAPIError as e:
         handle_api_error(e)
 
 
-@server.tool(description="Update a check item state (complete/incomplete). Requires both card_id and check_item_id.")
-async def update_check_item(card_id: str, check_item_id: str, state: str) -> str:
+@server.tool(description="Update a check item. Provide card_id, check_item_id, and at least one of: state (complete/incomplete), name, pos (top/bottom/numeric).")
+async def update_check_item(card_id: str, check_item_id: str, state: str = "", name: str = "", pos: str = "") -> str:
     try:
-        item = await get_client().update_check_item(
-            card_id=card_id, check_item_id=check_item_id, state=state,
-        )
+        kwargs = {"card_id": card_id, "check_item_id": check_item_id}
+        if state:
+            kwargs["state"] = state
+        if name:
+            kwargs["name"] = name
+        if pos:
+            kwargs["pos"] = pos
+        item = await get_client().update_check_item(**kwargs)
         return json.dumps(ensure_ascii=False, obj={"id": item.id, "name": item.name, "state": item.state})
     except TrelloAPIError as e:
         handle_api_error(e)
