@@ -5,6 +5,18 @@ from trello_mcp.errors import handle_api_error
 from trello_mcp.tools.validation import check_card_not_archived
 
 
+@server.tool(description="List all check items in a Trello checklist. Returns a JSON array with id, name, state, and pos for each item.")
+async def list_check_items(checklist_id: str) -> str:
+    try:
+        items = await get_client().list_check_items(checklist_id=checklist_id)
+        return json.dumps(ensure_ascii=False, obj=[
+            {"id": item.id, "name": item.name, "state": item.state, "pos": item.pos}
+            for item in items
+        ])
+    except TrelloAPIError as e:
+        handle_api_error(e)
+
+
 @server.tool(description="List all checklists on a Trello card. Returns a JSON array with id and name for each checklist.")
 async def list_card_checklists(card_id: str) -> str:
     try:

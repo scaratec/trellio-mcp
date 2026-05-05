@@ -169,6 +169,43 @@ Feature: Checklist Tools
       | cl-401 | ci-401 |
       | cl-402 | ci-402 |
 
+  # --- list_check_items ---
+
+  Scenario Outline: List check items of a checklist
+    Given the Trello API returns check items for checklist "<cl_id>":
+      | id     | name           | state        | pos  |
+      | ci-001 | <item_1>       | incomplete   | 1024 |
+      | ci-002 | <item_2>       | complete     | 2048 |
+    When I call the "list_check_items" tool with checklist_id "<cl_id>"
+    Then the result should be a JSON list with 2 entries
+      And entry 0 should have field "id" with value "ci-001"
+      And entry 0 should have field "name" with value "<item_1>"
+      And entry 0 should have field "state" with value "incomplete"
+      And entry 0 should have field "pos" with value "1024.0"
+      And entry 1 should have field "id" with value "ci-002"
+      And entry 1 should have field "name" with value "<item_2>"
+      And entry 1 should have field "state" with value "complete"
+      And entry 1 should have field "pos" with value "2048.0"
+      And the Trello client "list_check_items" should have been called with:
+        | argument     | value   |
+        | checklist_id | <cl_id> |
+
+    Examples:
+      | cl_id  | item_1         | item_2       |
+      | cl-100 | Write tests    | Update docs  |
+      | cl-200 | Deploy staging | Smoke test   |
+
+  Scenario: List check items returns empty list
+    Given the Trello API returns check items for checklist "cl-empty":
+      | id | name | state | pos |
+    When I call the "list_check_items" tool with checklist_id "cl-empty"
+    Then the result should be a JSON list with 0 entries
+
+  Scenario: List check items fails for non-existent checklist
+    Given the Trello API will return a 404 error for list_check_items
+    When I attempt to call "list_check_items" with checklist_id "cl-gone"
+    Then the tool should raise an error
+
   # --- Archived card validation ---
 
   Scenario: Reject checklist creation on an archived card

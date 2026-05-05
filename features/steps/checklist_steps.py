@@ -1,6 +1,7 @@
 from behave import given, when
+from trellio import TrelloAPIError
 from trellio.models import TrelloChecklist, TrelloCheckItem
-from steps.common_steps import run_async
+from steps.common_steps import run_async, capture_tool_error
 
 
 @given('the Trello API returns checklists for card "{card_id}":')
@@ -46,6 +47,35 @@ def step_api_returns_updated_check_item(context, ci_id, name, state):
 @given('the Trello API will accept check item deletion')
 def step_api_accepts_check_item_deletion(context):
     context.mock_client.delete_check_item.return_value = None
+
+
+@given('the Trello API returns check items for checklist "{cl_id}":')
+def step_api_returns_check_items(context, cl_id):
+    items = []
+    for row in context.table:
+        if row["id"]:
+            items.append(TrelloCheckItem(
+                id=row["id"], name=row["name"], state=row["state"],
+                pos=float(row["pos"]) if row["pos"] else None,
+            ))
+    context.mock_client.list_check_items.return_value = items
+
+
+@given('the Trello API will return a 404 error for list_check_items')
+def step_api_returns_404_for_list_check_items(context):
+    context.mock_client.list_check_items.side_effect = TrelloAPIError(404, "checklist not found")
+
+
+@when('I call the "list_check_items" tool with checklist_id "{cl_id}"')
+def step_call_list_check_items(context, cl_id):
+    from trello_mcp.tools.checklists import list_check_items
+    context.result = run_async(list_check_items(checklist_id=cl_id))
+
+
+@when('I attempt to call "list_check_items" with checklist_id "{cl_id}"')
+def step_attempt_list_check_items(context, cl_id):
+    from trello_mcp.tools.checklists import list_check_items
+    capture_tool_error(context, list_check_items(checklist_id=cl_id))
 
 
 @when('I call the "list_card_checklists" tool with card_id "{card_id}"')
