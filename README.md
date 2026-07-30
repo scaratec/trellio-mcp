@@ -222,9 +222,24 @@ PYTHONPATH=src .venv/bin/python -m behave
 ```
 
 ```
-17 features passed, 0 failed, 0 skipped
-163 scenarios passed, 0 failed, 0 skipped
-970 steps passed, 0 failed, 0 skipped
+18 features passed, 0 failed, 0 skipped
+182 scenarios passed, 0 failed, 0 skipped
+1103 steps passed, 0 failed, 0 skipped
+```
+
+`dependency_compatibility.feature` needs network access: it
+builds a wheel, installs it into throwaway environments at
+both ends of the declared `mcp` range, and drives the
+resulting server over stdio. It is the only feature that
+sees a broken dependency declaration — the others import
+the tool functions against the local `.venv`. It carries no
+opt-in tag on purpose: a dependency guard that has to be
+asked for is not a guard. To run the suite offline, exclude
+it explicitly:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m behave \
+  --exclude dependency_compatibility
 ```
 
 Test architecture:
@@ -252,7 +267,7 @@ trellio-mcp/
 │   ├── tools/             # 10 modules, 48 tools
 │   ├── resources.py       # 2 resource templates
 │   └── prompts.py         # 3 prompts
-├── features/              # 17 BDD feature files
+├── features/              # 18 BDD feature files
 │   └── steps/             # Step definitions
 ├── docs/
 │   ├── adr/               # 7 Architecture Decision Records
