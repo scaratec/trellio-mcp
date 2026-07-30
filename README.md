@@ -54,14 +54,6 @@ Card tools support `pos` (top/bottom), `idLabels`
 
 ## Installation
 
-### Smithery
-
-[![smithery badge](https://smithery.ai/badge/gupta/trellio-mcp)](https://smithery.ai/server/gupta/trellio-mcp)
-
-```bash
-npx @smithery/cli install gupta/trellio-mcp --client claude
-```
-
 ### Using pipx (recommended)
 
 To install globally so the `trellio-mcp` command is available in your PATH:
@@ -211,6 +203,11 @@ Trello API
 | 006 | Tools + Resources + Prompts as MCP capabilities |
 | 007 | `isError=true` + structured error content |
 
+**Accepted weaknesses** are recorded separately in
+[`docs/limitations/`](docs/limitations/). A limitation there has
+already been weighed against the clean solution and declined — check
+the register before proposing a fix for a known-imperfect behaviour.
+
 ## Testing
 
 The project uses BDD with
@@ -271,6 +268,7 @@ trellio-mcp/
 │   └── steps/             # Step definitions
 ├── docs/
 │   ├── adr/               # 7 Architecture Decision Records
+│   ├── limitations/       # Limitation Records (accepted weaknesses)
 │   ├── tool-design.md     # Scenario-driven tool analysis
 │   └── case-study-bdd-mcp-server.md
 └── pyproject.toml
@@ -294,6 +292,19 @@ npx @smithery/cli mcp publish "https://github.com/scaratec/trellio-mcp" -n gupta
 ```
 
 Also update the pinned version in `smithery.yaml` `commandFunction`.
+
+**The resulting listing stays empty.** Smithery populates an external
+entry by scanning the server over HTTP; this server is stdio-only
+(ADR 002), so the scan fails and the entry carries no connection or
+tool list — even though the publish command reports success. See
+[LIM 0001](docs/limitations/0001-smithery-listing-cannot-be-populated.md).
+Install via pipx or uvx instead.
+
+### MCP registry
+
+`server.json` describes the server for the official MCP registry by
+static declaration rather than introspection. Keep its two `version`
+fields in step with `pyproject.toml`.
 
 ## License
 
