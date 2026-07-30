@@ -823,20 +823,20 @@ wheels = [
 
 [[package]]
 name = "trellio-client"
-version = "1.0.1"
+version = "1.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ee/cf/d0c2b835e542d3c804464893b4cd5cc73a41bc7d891408c9bbc9264fd356/trellio_client-1.0.1.tar.gz", hash = "sha256:6729dbf48cc36fecb4367c6252505b0e6efa70cabd7dbeeace71bc8818f4ad4a", size = 21926, upload-time = "2026-04-09T15:29:28.255Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/82/9a/e8f2f7fc7ca17bd9e2244c2d3c5b119d8a49d6bf92dc3258e442044692d1/trellio_client-1.8.0.tar.gz", hash = "sha256:fdbe9a9b7100e6c05c02a3dcf1a172e5bbdc2c427f274deed7224bfd65675590", size = 23039, upload-time = "2026-05-05T07:28:45.741Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/8e/0a8fc32c3497e9eb55bda67c4c1371b4dcdec90159eaf7ed9878a900740c/trellio_client-1.0.1-py3-none-any.whl", hash = "sha256:8cf2e61fb3b6710286feb51fc6637758c704ef6b16124ce64e9c38cc0a92de19", size = 20133, upload-time = "2026-04-09T15:29:26.962Z" },
+    { url = "https://files.pythonhosted.org/packages/ea/ef/3d9020ab24cbb2953af300cb913de5bdb759598d4420c5f6984a20278062/trellio_client-1.8.0-py3-none-any.whl", hash = "sha256:f99179a522c14b979381fd8bb160ae7fca7d0ff1a7152efb98b5c6f5c61deb21", size = 21187, upload-time = "2026-05-05T07:28:44.532Z" },
 ]
 
 [[package]]
 name = "trellio-mcp"
-version = "0.1.2"
+version = "0.14.0"
 source = { editable = "." }
 dependencies = [
     { name = "mcp" },
@@ -856,8 +856,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "behave", marker = "extra == 'dev'", specifier = ">=1.2.6" },
-    { name = "mcp", specifier = ">=1.12.0" },
-    { name = "trellio-client", specifier = ">=1.0.0" },
+    { name = "mcp", specifier = ">=1.12.0,<2" },
+    { name = "trellio-client", specifier = ">=1.8.0" },
 ]
 provides-extras = ["dev"]
 

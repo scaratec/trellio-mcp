@@ -25,7 +25,10 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
-    "mcp>=1.12.0",
+    # Upper bound is required: mcp 2.0 removed mcp.server.fastmcp, which
+    # this server imports. Raising it needs a migration to the renamed
+    # mcp.server.mcpserver API, not just a version bump.
+    "mcp>=1.12.0,<2",
     "trellio-client>=1.8.0",
 ]
 
