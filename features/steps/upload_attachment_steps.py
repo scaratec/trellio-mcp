@@ -1,5 +1,4 @@
 import os
-import tempfile
 from pathlib import Path
 from behave import given, when
 from trellio.models import TrelloAttachment
@@ -7,14 +6,24 @@ from steps.common_steps import run_async, capture_tool_error
 
 
 def _ensure_temp_dir(context):
-    if not hasattr(context, '_temp_dir') or not os.path.isdir(context._temp_dir):
-        context._temp_dir = tempfile.mkdtemp()
+    """The directory this scenario may write into.
+
+    It no longer creates anything. features/environment.py opens one directory
+    per scenario and removes it afterwards, so that nothing a scenario writes
+    reaches the next one (§6.1) and nothing survives the run (§6.2). The
+    helper only refuses to hand out a directory that is not there.
+    """
+    temp_dir = getattr(context, 'temp_dir', None)
+    assert temp_dir and os.path.isdir(temp_dir), (
+        "This scenario has no temporary directory. features/environment.py "
+        "creates one in before_scenario and removes it in after_scenario; "
+        "outside that window there is none to write into.")
+    return temp_dir
 
 
 @given('a temporary file "{filename}" with {size_bytes:d} bytes of content')
 def step_create_temp_file(context, filename, size_bytes):
-    _ensure_temp_dir(context)
-    path = os.path.join(context._temp_dir, filename)
+    path = os.path.join(_ensure_temp_dir(context), filename)
     with open(path, 'wb') as f:
         f.write(os.urandom(size_bytes))
     context.temp_file_path = path
@@ -22,8 +31,7 @@ def step_create_temp_file(context, filename, size_bytes):
 
 @given('a temporary directory "{dirname}"')
 def step_create_temp_directory(context, dirname):
-    _ensure_temp_dir(context)
-    path = os.path.join(context._temp_dir, dirname)
+    path = os.path.join(_ensure_temp_dir(context), dirname)
     os.makedirs(path, exist_ok=True)
     context.temp_dir_path = path
 
@@ -58,8 +66,8 @@ def step_call_upload_attachment(context):
     row = context.table[0]
     file_path = row["file_path"]
     # Resolve relative filenames to temp directory
-    if not os.path.isabs(file_path) and hasattr(context, '_temp_dir'):
-        file_path = os.path.join(context._temp_dir, file_path)
+    if not os.path.isabs(file_path):
+        file_path = os.path.join(_ensure_temp_dir(context), file_path)
     context.result = run_async(upload_attachment(
         card_id=row["card_id"], file_path=file_path, name=row.get("name", ""),
     ))
@@ -70,8 +78,8 @@ def step_call_upload_attachment_no_name(context):
     from trello_mcp.tools.attachments import upload_attachment
     row = context.table[0]
     file_path = row["file_path"]
-    if not os.path.isabs(file_path) and hasattr(context, '_temp_dir'):
-        file_path = os.path.join(context._temp_dir, file_path)
+    if not os.path.isabs(file_path):
+        file_path = os.path.join(_ensure_temp_dir(context), file_path)
     context.result = run_async(upload_attachment(
         card_id=row["card_id"], file_path=file_path,
     ))
@@ -82,8 +90,8 @@ def step_attempt_upload_attachment(context):
     from trello_mcp.tools.attachments import upload_attachment
     row = context.table[0]
     file_path = row["file_path"]
-    if not os.path.isabs(file_path) and hasattr(context, '_temp_dir'):
-        file_path = os.path.join(context._temp_dir, file_path)
+    if not os.path.isabs(file_path):
+        file_path = os.path.join(_ensure_temp_dir(context), file_path)
     capture_tool_error(context, upload_attachment(
         card_id=row["card_id"], file_path=file_path, name=row.get("name", ""),
     ))
@@ -94,8 +102,8 @@ def step_attempt_upload_directory(context):
     from trello_mcp.tools.attachments import upload_attachment
     row = context.table[0]
     file_path = row["file_path"]
-    if not os.path.isabs(file_path) and hasattr(context, '_temp_dir'):
-        file_path = os.path.join(context._temp_dir, file_path)
+    if not os.path.isabs(file_path):
+        file_path = os.path.join(_ensure_temp_dir(context), file_path)
     capture_tool_error(context, upload_attachment(
         card_id=row["card_id"], file_path=file_path,
     ))
@@ -103,7 +111,7 @@ def step_attempt_upload_directory(context):
 
 @given('the file "{filename}" has no read permissions')
 def step_remove_read_permissions(context, filename):
-    path = os.path.join(context._temp_dir, filename)
+    path = os.path.join(_ensure_temp_dir(context), filename)
     os.chmod(path, 0o000)
 
 
@@ -112,8 +120,8 @@ def step_attempt_upload_unreadable(context):
     from trello_mcp.tools.attachments import upload_attachment
     row = context.table[0]
     file_path = row["file_path"]
-    if not os.path.isabs(file_path) and hasattr(context, '_temp_dir'):
-        file_path = os.path.join(context._temp_dir, file_path)
+    if not os.path.isabs(file_path):
+        file_path = os.path.join(_ensure_temp_dir(context), file_path)
     capture_tool_error(context, upload_attachment(
         card_id=row["card_id"], file_path=file_path,
     ))

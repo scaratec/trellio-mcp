@@ -14,25 +14,32 @@ def step_api_will_timeout(context, message):
     context.mock_client.list_boards.side_effect = TrelloAPIError(0, message)
 
 
-@given('the Trello API will fail on get_board with status {status:d} and message "{message}"')
-def step_api_fail_get_board(context, status, message):
-    context.mock_client.get_board.side_effect = TrelloAPIError(status, message)
+@given('the Trello API will fail on {method} with status {status:d} and message "{message}"')
+def step_api_fail_on_method(context, method, status, message):
+    """Arm exactly the method the step text names, and no other.
 
+    One parameterised step instead of one per method, because the per-method
+    variants were five copies of the same line that could drift apart from
+    their own step text - and one of them had. The get_attachment variant also
+    armed download_attachment, a method its text never mentioned; since
+    download_attachment never calls get_attachment, the unnamed half was the
+    only half that ever did anything. A scenario reading "will fail on
+    get_attachment" therefore described a different event than the one that
+    took place (guidelines 1.3 and 2.2). Taking the method name from the text
+    makes that class of drift impossible: what the scenario says is what the
+    step does.
 
-@given('the Trello API will fail on get_card with status {status:d} and message "{message}"')
-def step_api_fail_get_card(context, status, message):
-    context.mock_client.get_card.side_effect = TrelloAPIError(status, message)
-
-
-@given('the Trello API will fail on list_cards with status {status:d} and message "{message}"')
-def step_api_fail_list_cards(context, status, message):
-    context.mock_client.list_cards.side_effect = TrelloAPIError(status, message)
-
-
-@given('the Trello API will fail on get_attachment with status {status:d} and message "{message}"')
-def step_api_fail_get_attachment(context, status, message):
-    context.mock_client.get_attachment.side_effect = TrelloAPIError(status, message)
-    context.mock_client.download_attachment.side_effect = TrelloAPIError(status, message)
+    The mock carries the client's spec, so a name that TrellioClient does not
+    have cannot silently arm nothing.
+    """
+    try:
+        target = getattr(context.mock_client, method)
+    except AttributeError:
+        raise AssertionError(
+            f'TrellioClient has no method "{method}", so this step would arm a '
+            f'failure that nothing can ever reach. Correct the method name in '
+            f'the feature file.') from None
+    target.side_effect = TrelloAPIError(status, message)
 
 
 @when('I attempt to call the "list_boards" tool')
